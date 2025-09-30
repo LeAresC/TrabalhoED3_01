@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1759190364 source:c:\users\luise\onedrive\documentos\ediii_trabalho1\funcionalidades.c
+	<stdio.h>
+	"funcionalidades.h"
+
+1759190627 source:c:\users\luise\onedrive\documentos\ediii_trabalho1\main.c
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"funcionalidades.h"
+
+1759190377 c:\users\luise\onedrive\documentos\ediii_trabalho1\funcionalidades.h
+
