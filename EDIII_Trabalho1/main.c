@@ -5,27 +5,33 @@
 
 #define MAXIMO 500
 
-int main (int argc, char *argv[]){
+int main()
+{
 
-    int funcionalidade = atoi(argv[1]);
-
-    if(funcionalidade == 1){
-        char *nome_do_arquivo = (char *) malloc(MAXIMO*sizeof(char));
-        strcpy(nome_do_arquivo, argv[2]);
-        int ret = gera_indice_primario(nome_do_arquivo);
-        if(ret == 1)
-        printf("Arquivo Criado com sucesso\n");
-        else printf("Falha na criacao do Arquivo\n");
+    int funcionalidade;
+    scanf("%d", &funcionalidade);
+    if (funcionalidade == 1)
+    {
     }
 
-    if(funcionalidade == 2){
-
+    if (funcionalidade == 2)
+    {
     }
 
-    if(funcionalidade == 3){
-
+    if (funcionalidade == 3)
+    {
+        char *arquivo_bin = (char *)malloc(MAXIMO * sizeof(char));
+        scanf("%s", arquivo_bin);
+        ler_arquivo_binario(arquivo_bin);
     }
-    if(funcionalidade == 4){
-
+    if (funcionalidade == 4)
+    {
+        char *arquivo_dados = (char *)malloc(MAXIMO * sizeof(char));
+        char *arquivo_indice = (char *)malloc(MAXIMO * sizeof(char));
+        int qtd;
+        scanf("%s", arquivo_dados);
+        scanf("%s", arquivo_indice);
+        scanf("%d", &qtd);
+        busca_em_arquivo(arquivo_dados, arquivo_indice, qtd);
     }
 }
