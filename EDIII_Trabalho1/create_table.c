@@ -118,7 +118,9 @@ void createTable(char *csvFilename, char *dataFilename, char *indexFilename) {
     memset(&indexHeader, 0, sizeof(IndexHeader));
     indexHeader.status = '0';
     memset(indexHeader.lixo, '$', 11);
-    fwrite(&indexHeader, sizeof(IndexHeader), 1, indexFile);
+    fwrite(&indexHeader.status, sizeof(indexHeader.status), 1, indexFile);
+    fwrite(&indexHeader.lixo, sizeof(indexHeader.lixo), 1, indexFile);
+
 
     char csvHeader[256];
     fgets(csvHeader, sizeof(csvHeader), csvFile);
@@ -171,7 +173,8 @@ void createTable(char *csvFilename, char *dataFilename, char *indexFilename) {
     qsort(indexArray, indexCount, sizeof(IndexRecord), compareIndexRecords);
 
     for (int i = 0; i < indexCount; i++) {
-        fwrite(&indexArray[i], sizeof(IndexRecord), 1, indexFile);
+        fwrite(&indexArray[i].idPessoa, sizeof(indexArray->idPessoa), 1, indexFile);
+        fwrite(&indexArray[i].byteOffset, sizeof(indexArray->byteOffset), 1, indexFile);
     }
 
     dataHeader.status = '1';
@@ -183,7 +186,7 @@ void createTable(char *csvFilename, char *dataFilename, char *indexFilename) {
 
     indexHeader.status = '1';
     fseek(indexFile, 0, SEEK_SET);
-    fwrite(&indexHeader, sizeof(IndexHeader), 1, indexFile);
+    fwrite(&indexHeader.status, sizeof(indexHeader.status), 1, indexFile);
 
     free(indexArray);
     fclose(csvFile);
