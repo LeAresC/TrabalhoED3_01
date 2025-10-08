@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -g -std=c11
-LDFLAGS =
+LDFLAGS = -lm
 
-SRCS = main.c create_table.c utilidades.c
+SRCS = *.c
 
 OBJS = $(SRCS:.c=.o)
 

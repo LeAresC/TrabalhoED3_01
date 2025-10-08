@@ -1,36 +1,45 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "funcionalidades.h"
-#include "create_table.h"
-
+#include "criar_indice.h"
+#include "criar_tabela.h"
 
 #define MAXIMO 500
 
 void binarioNaTela(char *nomeArquivoBinario);
 
 int main () {
-
     int funcionalidade;
+    int resultado;
     scanf("%d", &funcionalidade);
 
-//    if(funcionalidade == 1){
-//        char *nome_do_arquivo = (char *) malloc(MAXIMO*sizeof(char));
-//        strcpy(nome_do_arquivo, argv[2]);
-//        int ret = gera_indice_primario(nome_do_arquivo);
-//        if(ret == 1)
-//        printf("Arquivo Criado com sucesso\n");
-//        else printf("Falha na criacao do Arquivo\n");
-//    }
+    if(funcionalidade == 1){
+        // Lê o nome do arquivo de índice
+        char nomeIndex[MAXIMO];
+        scanf("%s", nomeIndex);
+        // Chama a função para criar o índice e somente imprime o binário na tela se der certo
+        // Retorna 1 se tudo der certo, 0 caso contrário
+        resultado = criarIndice(nomeIndex);
+        if (resultado == 1) {
+            binarioNaTela(nomeIndex);
+        } else {
+            printf("Falha no processamento do arquivo.\n");
+        }
+    }
 
-    if(funcionalidade == 2){
-        char csvFilename[100], dataFilename[100], indexFilename[100];
-        scanf("%s %s %s", csvFilename, dataFilename, indexFilename);
-
-        createTable(csvFilename, dataFilename, indexFilename);
-
-        binarioNaTela(dataFilename);
-        binarioNaTela(indexFilename);
+    if (funcionalidade == 2) {
+        // Lê os nomes dos arquivos
+        char nomeCsv[MAXIMO], nomeData[MAXIMO], nomeIndex[MAXIMO];
+        scanf("%s %s %s", nomeCsv, nomeData, nomeIndex);
+        // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
+        // Retorna 1 se tudo der certo, 0 caso contrário
+        resultado = criarTabela(nomeCsv, nomeData, nomeIndex);
+        if (resultado == 1) {
+            binarioNaTela(nomeData);
+            binarioNaTela(nomeIndex);
+        } else {
+            printf("Falha no processamento do arquivo.\n");
+        }
 
     }
 
