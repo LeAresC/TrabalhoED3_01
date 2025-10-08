@@ -2,23 +2,35 @@
 #include <stdio.h>
 #include <string.h>
 #include "funcionalidades.h"
+#include "create_table.h"
+
 
 #define MAXIMO 500
 
-int main (int argc, char *argv[]){
+void binarioNaTela(char *nomeArquivoBinario);
 
-    int funcionalidade = atoi(argv[1]);
+int main () {
 
-    if(funcionalidade == 1){
-        char *nome_do_arquivo = (char *) malloc(MAXIMO*sizeof(char));
-        strcpy(nome_do_arquivo, argv[2]);
-        int ret = gera_indice_primario(nome_do_arquivo);
-        if(ret == 1)
-        printf("Arquivo Criado com sucesso\n");
-        else printf("Falha na criacao do Arquivo\n");
-    }
+    int funcionalidade;
+    scanf("%d", &funcionalidade);
+
+//    if(funcionalidade == 1){
+//        char *nome_do_arquivo = (char *) malloc(MAXIMO*sizeof(char));
+//        strcpy(nome_do_arquivo, argv[2]);
+//        int ret = gera_indice_primario(nome_do_arquivo);
+//        if(ret == 1)
+//        printf("Arquivo Criado com sucesso\n");
+//        else printf("Falha na criacao do Arquivo\n");
+//    }
 
     if(funcionalidade == 2){
+        char csvFilename[100], dataFilename[100], indexFilename[100];
+        scanf("%s %s %s", csvFilename, dataFilename, indexFilename);
+
+        createTable(csvFilename, dataFilename, indexFilename);
+
+        binarioNaTela(dataFilename);
+        binarioNaTela(indexFilename);
 
     }
 
