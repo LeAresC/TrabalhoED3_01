@@ -5,7 +5,7 @@
 #include "auxiliares_busca.h"
 #define MAXIMO 500
 
-RegistroPessoa *le_registro(FILE *arq)
+RegistroPessoa *leRegistro(FILE *arq)
 {
     // Le e o status do arquivo e seu tamanho e guarda os resultados em um buffer
     char buffer1;
@@ -16,85 +16,85 @@ RegistroPessoa *le_registro(FILE *arq)
     // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro +
     // o status(1 byte) o tamanho(4 bytes) e os 2 \0 do nome e usuário (2 bytes) = tamanhoregistro + 7 byte 
 
-    RegistroPessoa *registro_atual = (RegistroPessoa*) malloc(buffer2 + 7);
-    registro_atual->removido = buffer1;
-    registro_atual->tamanhoRegistro = buffer2;
+    RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(buffer2 + 7);
+    registroAtual->removido = buffer1;
+    registroAtual->tamanhoRegistro = buffer2;
 
-    // So o registro atual foi removido retorna o registro_atual como está
-    if (registro_atual->removido == '1')
+    // So o registro atual foi removido retorna o registroAtual como está
+    if (registroAtual->removido == '1')
     {
-        return registro_atual;
+        return registroAtual;
     }
 
     // Lê id idade e tamanhoNome
-    fread(&registro_atual->idPessoa, sizeof(int), 1, arq);
-    fread(&registro_atual->idadePessoa, sizeof(int), 1, arq);
-    fread(&registro_atual->tamanhoNomePessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->idPessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->idadePessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->tamanhoNomePessoa, sizeof(int), 1, arq);
 
     // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
-    registro_atual->nomePessoa = malloc(sizeof(char) * (registro_atual->tamanhoNomePessoa + 1));
+    registroAtual->nomePessoa = malloc(sizeof(char) * (registroAtual->tamanhoNomePessoa + 1));
 
 
-    // Se não houver nome copia "-" para o registro_atual
-    if (registro_atual->tamanhoNomePessoa == 0)
+    // Se não houver nome copia "-" para o registroAtual
+    if (registroAtual->tamanhoNomePessoa == 0)
     {
-        strcpy(registro_atual->nomePessoa, "-");
-        registro_atual->nomePessoa[1] = '\0';
+        strcpy(registroAtual->nomePessoa, "-");
+        registroAtual->nomePessoa[1] = '\0';
     }
 
-    //Do contrário copia o nome do arquivo para o registro_atual
+    //Do contrário copia o nome do arquivo para o registroAtual
     else
     {
-        fread(registro_atual->nomePessoa, sizeof(char), registro_atual->tamanhoNomePessoa, arq);
-        registro_atual->nomePessoa[registro_atual->tamanhoNomePessoa] = '\0';
+        fread(registroAtual->nomePessoa, sizeof(char), registroAtual->tamanhoNomePessoa, arq);
+        registroAtual->nomePessoa[registroAtual->tamanhoNomePessoa] = '\0';
     }
-    fread(&registro_atual->tamanhoNomeUsuario, sizeof(int), 1, arq);
+    fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
     
     // Aloca espaço para o nomeusuario = tamanhoNomeUsuario + (1byte) do \0
-    registro_atual->nomeUsuario = malloc(sizeof(char) * (registro_atual->tamanhoNomeUsuario + 1));
+    registroAtual->nomeUsuario = malloc(sizeof(char) * (registroAtual->tamanhoNomeUsuario + 1));
 
-     // Se não houver usuario copia "-" para o registro_atual
-    if (registro_atual->tamanhoNomeUsuario == 0)
+     // Se não houver usuario copia "-" para o registroAtual
+    if (registroAtual->tamanhoNomeUsuario == 0)
     {
-        strcpy(registro_atual->nomeUsuario, "-");
-        registro_atual->nomeUsuario[1] = '\0';
+        strcpy(registroAtual->nomeUsuario, "-");
+        registroAtual->nomeUsuario[1] = '\0';
     }
-    //Do contrário copia o nome de usuario do arquivo para o registro_atual
+    //Do contrário copia o nome de usuario do arquivo para o registroAtual
     else
     {
-        fread(registro_atual->nomeUsuario, sizeof(char), registro_atual->tamanhoNomeUsuario, arq);
-        registro_atual->nomeUsuario[registro_atual->tamanhoNomeUsuario] = '\0';
+        fread(registroAtual->nomeUsuario, sizeof(char), registroAtual->tamanhoNomeUsuario, arq);
+        registroAtual->nomeUsuario[registroAtual->tamanhoNomeUsuario] = '\0';
     }
     // Retorna o registro atual
-    return registro_atual;
+    return registroAtual;
 }
 
-void imprimir_saida(RegistroPessoa *registro_atual)
+void imprimirSaida(RegistroPessoa *registroAtual)
 {
-    // Imprime o registro_atual segundo as especificações do trabalho
-    printf("Dados da pessoa de codigo %d\n", registro_atual->idPessoa);
-    printf("Nome: %s\n", registro_atual->nomePessoa);
-    // Se a idade do registro_atual for -1 imprime "-" do contrário imprime a idade da memória
-    if (registro_atual->idadePessoa != -1)
-        printf("Idade: %d\n", registro_atual->idadePessoa);
+    // Imprime o registroAtual segundo as especificações do trabalho
+    printf("Dados da pessoa de codigo %d\n", registroAtual->idPessoa);
+    printf("Nome: %s\n", registroAtual->nomePessoa);
+    // Se a idade do registroAtual for -1 imprime "-" do contrário imprime a idade da memória
+    if (registroAtual->idadePessoa != -1)
+        printf("Idade: %d\n", registroAtual->idadePessoa);
     else
         printf("Idade: -\n");
-    printf("Usuario: %s\n\n", registro_atual->nomeUsuario);
+    printf("Usuario: %s\n\n", registroAtual->nomeUsuario);
 }
 
-void erro_abertura()
+void erroAbertura()
 {
     //Imprime o erro de abertura do arquivo
     printf("Falha no processamento do arquivo.\n");
 }
 
-void erro_registro()
+void erroRegistro()
 {
     //Imprime o erro de registro
     printf("Registro inexistente.\n");
 }
 
-CabecalhoPessoa* le_cabecalho(FILE *arq)
+CabecalhoPessoa* leCabecalho(FILE *arq)
 {
     // Le o cabeçalho do arquivo de dados
     CabecalhoPessoa *cabecalho  = (CabecalhoPessoa*)malloc(17);
@@ -105,7 +105,7 @@ CabecalhoPessoa* le_cabecalho(FILE *arq)
     return cabecalho;
 }
 
-void scan_quote_string(char *str)
+void scanQuoteString(char *str)
 {
 
     /*
@@ -117,7 +117,7 @@ void scan_quote_string(char *str)
      *
      *	Para ler isso para as strings já alocadas str1 e str2 do seu programa, você faz:
      *		scanf("%s", str1); // Vai salvar nomeDoCampo em str1
-     *		scan_quote_string(str2); // Vai salvar MARIA DA SILVA em str2 (sem as aspas)
+     *		scanQuoteString(str2); // Vai salvar MARIA DA SILVA em str2 (sem as aspas)
      *
      */
 

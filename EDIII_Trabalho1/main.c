@@ -22,36 +22,39 @@ int main()
     if (funcionalidade == 3)
     {
         //Lê o nome do arquivo binário
-        char arquivo_bin[MAXIMO];
-        scanf("%s", arquivo_bin);
+        char arquivoBin[MAXIMO];
+        scanf("%s", arquivoBin);
 
         //Returna 2 se tudo certo, 1 se o não houver registro e 0 se houver erro na abertura do arquivo
-        resultado = ler_arquivo_binario(arquivo_bin);
+        resultado = lerArquivoBinario(arquivoBin);
 
         if(resultado == 0)
         {
-            erro_abertura();
+            erroAbertura();
         }
         if(resultado == 1)
         {
-            erro_registro();  
+            erroRegistro();  
         }
 
     }
     if (funcionalidade == 4)
     {
-        char arquivo_dados[MAXIMO];
-        char arquivo_indice[MAXIMO];
-        int qtd;
-        scanf("%s", arquivo_dados);
-        scanf("%s", arquivo_indice);
-        scanf("%d", &qtd);
 
-        resultado = busca_em_arquivo(arquivo_dados, arquivo_indice, qtd);
+        // Le os dados
+        char arquivoDados[MAXIMO];
+        char arquivoIndice[MAXIMO];
+        int qtd;
+        scanf("%s", arquivoDados);
+        scanf("%s", arquivoIndice);
+        scanf("%d", &qtd);
+        
+        //Retona 1 se tudo certo e 0 se não foi possível abrir o arquivo
+        resultado = buscaEmArquivo(arquivoDados, arquivoIndice, qtd);
     
         if(resultado == 0)
         {
-            erro_abertura();
+            erroAbertura();
         }
     }
 }
