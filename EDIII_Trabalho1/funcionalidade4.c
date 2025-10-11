@@ -5,6 +5,9 @@
 #define MAXIMO 500
 #define INF 1e8
 
+void scan_quote_string(char *str);
+
+
 int busca_binaria_indice(FILE *arq_i, int valor_id)
 {
     // Faz a busca binária no arquivo de indice

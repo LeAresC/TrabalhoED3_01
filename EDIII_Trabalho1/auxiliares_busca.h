@@ -9,4 +9,3 @@ int busca_em_arquivo(char *arquivo_dados, char *arquivo_indice,int qtd);
 RegistroPessoa *le_registro(FILE *arq);
 int busca_binaria_indice(FILE *arq_i, int valor_campo);
 CabecalhoPessoa *le_cabecalho(FILE *arq);
-void scan_quote_string(char *str);
