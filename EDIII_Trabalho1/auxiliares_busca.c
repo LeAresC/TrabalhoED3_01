@@ -7,16 +7,10 @@
 
 RegistroPessoa *leRegistro(FILE *arq)
 {
-    // Le e o status do arquivo e seu tamanho e guarda os resultados em um buffer
-    char buffer1;
-    int buffer2;
-    fread(&buffer1, sizeof(char), 1, arq);
-    fread(&buffer2, sizeof(int), 1, arq);
-
     // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
     RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(sizeof(RegistroPessoa));
-    registroAtual->removido = buffer1;
-    registroAtual->tamanhoRegistro = buffer2;
+    fread(&registroAtual->removido, sizeof(char), 1, arq);
+    fread(&registroAtual->tamanhoRegistro, sizeof(int), 1, arq);
 
     // So o registro atual foi removido retorna o registroAtual como está
     if (registroAtual->removido == '1')
