@@ -1,6 +1,8 @@
 #ifndef DATA_STRUCTS_H
 #define DATA_STRUCTS_H
 
+#define MAXIMO 500
+
 typedef struct {
     char status; // 1 byte: '0' inconsistente, '1' consistente
     int quantidadePessoas; // 4 bytes
@@ -18,6 +20,7 @@ typedef struct {
     char *nomePessoa; // variável
     char *nomeUsuario; // variável
 } RegistroPessoa;
+
 typedef struct {
     char status; // 1 byte: '0' inconsistente, '1' consistente
     char lixo[11]; // 11 bytes de lixo preenchidos com '$'

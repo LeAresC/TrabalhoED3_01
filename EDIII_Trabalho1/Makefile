@@ -1,13 +1,17 @@
+
 CC = gcc
 CFLAGS = -Wall -g -std=c11
-LDFLAGS = -lm
+LDFLAGS =
 
-SRCS = *.c
+# Expand sources explicitly so make sees actual files (avoids literal "*.c" problems)
+SRCS := $(wildcard *.c)
 
-OBJS = $(SRCS:.c=.o)
+# Convert source filenames to object filenames
+OBJS := $(patsubst %.c,%.o,$(SRCS))
 
 TARGET = programaTrab
 
+# binary artifacts (if any)
 BINS = *.bin
 
 all: $(TARGET)
