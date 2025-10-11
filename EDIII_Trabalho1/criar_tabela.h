@@ -4,7 +4,7 @@
 #include "data_structs.h"
 #include <stdio.h>
 
-int criarTabela(char *nomeCSV, char *nomeData, char *nomeIndex);
+int criarTabela(const char *nomeArquivoCsv, const char *nomeArquivoDados, const char *nomeArquivoIndice);
 
 RegistroPessoa* lerRegistroCsv(FILE *arquivoCsv);
 

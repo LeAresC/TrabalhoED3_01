@@ -2,11 +2,13 @@
 #include <string.h>
 #include "criar_indice.h"
 
-int criarIndice(char *nomeArquivo){
+int criarIndice(const char *nomeArquivo){
+    // Declaração de variáveis
     FILE *arquivoIndice;
     CabecalhoIndice dataHeader;
-    
+    // Abre o arquivo de índice para escrita binária
     arquivoIndice = fopen(nomeArquivo, "wb");
+    // Verifica se o arquivo foi aberto corretamente
     if(arquivoIndice == NULL){
         return 0;
     }
@@ -19,6 +21,7 @@ int criarIndice(char *nomeArquivo){
     fwrite(&dataHeader.status, sizeof(dataHeader.status), 1, arquivoIndice);
     fwrite(dataHeader.lixo, sizeof(dataHeader.lixo), 1, arquivoIndice);
 
+    // Fecha o arquivo de índice e retorna sucesso
     fclose(arquivoIndice);
     return 1;
 }

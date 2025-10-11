@@ -4,21 +4,20 @@
 #include "criar_indice.h"
 #include "criar_tabela.h"
 
-#define MAXIMO 500
-
 void binarioNaTela(char *nomeArquivoBinario);
 
 int main () {
+    // Declaração de variáveis
     int funcionalidade;
     int resultado;
+
+    // Lê o número da funcionalidade
     scanf("%d", &funcionalidade);
 
     if(funcionalidade == 1){
-        // Lê o nome do arquivo de índice
+        // Ler o nome do arquivo de índice e chamar a função
         char nomeIndex[MAXIMO];
         scanf("%s", nomeIndex);
-        // Chama a função para criar o índice e somente imprime o binário na tela se der certo
-        // Retorna 1 se tudo der certo, 0 caso contrário
         resultado = criarIndice(nomeIndex);
         if (resultado == 1) {
             binarioNaTela(nomeIndex);
@@ -28,15 +27,15 @@ int main () {
     }
 
     if (funcionalidade == 2) {
-        // Lê os nomes dos arquivos
-        char nomeCsv[MAXIMO], nomeData[MAXIMO], nomeIndex[MAXIMO];
-        scanf("%s %s %s", nomeCsv, nomeData, nomeIndex);
         // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
         // Retorna 1 se tudo der certo, 0 caso contrário
-        resultado = criarTabela(nomeCsv, nomeData, nomeIndex);
+        // Ler os nomes dos arquivos e chamar a função criarTabela
+        char nome_csv[MAXIMO], nome_dados[MAXIMO], nome_indice[MAXIMO];
+        scanf("%s %s %s", nome_csv, nome_dados, nome_indice);
+        resultado = criarTabela(nome_csv, nome_dados, nome_indice);
         if (resultado == 1) {
-            binarioNaTela(nomeData);
-            binarioNaTela(nomeIndex);
+            binarioNaTela(nome_dados);
+            binarioNaTela(nome_indice);
         } else {
             printf("Falha no processamento do arquivo.\n");
         }
