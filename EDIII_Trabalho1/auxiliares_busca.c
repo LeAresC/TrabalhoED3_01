@@ -13,10 +13,8 @@ RegistroPessoa *leRegistro(FILE *arq)
     fread(&buffer1, sizeof(char), 1, arq);
     fread(&buffer2, sizeof(int), 1, arq);
 
-    // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro +
-    // o status(1 byte) o tamanho(4 bytes) e os 2 \0 do nome e usuário (2 bytes) = tamanhoregistro + 7 byte 
-
-    RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(buffer2 + 7);
+    // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
+    RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(sizeof(RegistroPessoa));
     registroAtual->removido = buffer1;
     registroAtual->tamanhoRegistro = buffer2;
 
@@ -97,7 +95,7 @@ void erroRegistro()
 CabecalhoPessoa* leCabecalho(FILE *arq)
 {
     // Le o cabeçalho do arquivo de dados
-    CabecalhoPessoa *cabecalho  = (CabecalhoPessoa*)malloc(17);
+    CabecalhoPessoa *cabecalho  = (CabecalhoPessoa*)malloc(sizeof(CabecalhoPessoa));
     fread(&cabecalho->status, sizeof(char), 1 , arq);
     fread(&cabecalho->quantidadePessoas, sizeof(int), 1 ,arq);
     fread(&cabecalho->quantidadeRemovidos, sizeof(int), 1, arq);

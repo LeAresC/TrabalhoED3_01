@@ -1,3 +1,5 @@
+#ifndef AUXILIARES_BUSCA_H
+#define AUXILIARES_BUSCA_H
 #include <stdio.h>
 #include "data_structs.h"
 
@@ -10,3 +12,5 @@ RegistroPessoa *leRegistro(FILE *arq);
 int buscaBinariaIndice(FILE *arqI, int valorCampo);
 CabecalhoPessoa *leCabecalho(FILE *arq);
 void scanQuoteString(char *str);
+
+#endif // AUXILIARES_BUSCA_H

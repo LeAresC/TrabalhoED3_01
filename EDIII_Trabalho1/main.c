@@ -28,7 +28,7 @@ int main () {
             binarioNaTela(nomeIndex);
         } else {
             // Falha na criação do índice, imprime como definido
-            printf("Falha no processamento do arquivo.\n");
+            erroAbertura();
         }
     }
 
@@ -45,18 +45,18 @@ int main () {
             binarioNaTela(nome_indice);
         } else {
             // Falha na criação da tabela, imprime como definido
-            printf("Falha no processamento do arquivo.\n");
+            erroAbertura();
         }
 
     }
 
     if(funcionalidade == 3){
         //Lê o nome do arquivo binário
-        char arquivo_bin[MAXIMO];
-        scanf("%s", arquivo_bin);
+        char arquivoBin[MAXIMO];
+        scanf("%s", arquivoBin);
 
         //Returna 2 se tudo certo, 1 se o não houver registro e 0 se houver erro na abertura do arquivo
-        resultado = lerArquivoBinario(arquivo_bin);
+        resultado = lerArquivoBinario(arquivoBin);
 
         if(resultado == 0)
         {
@@ -70,14 +70,16 @@ int main () {
     }
     if (funcionalidade == 4)
     {
-        char arquivo_dados[MAXIMO];
-        char arquivo_indice[MAXIMO];
+        // Le os dados
+        char arquivoDados[MAXIMO];
+        char arquivoIndice[MAXIMO];
         int qtd;
-        scanf("%s", arquivo_dados);
-        scanf("%s", arquivo_indice);
+        scanf("%s", arquivoDados);
+        scanf("%s", arquivoIndice);
         scanf("%d", &qtd);
 
-        resultado = buscaEmArquivo(arquivo_dados, arquivo_indice, qtd);
+        // Retorna 1 se tudo certo e 0 se houver 
+        resultado = buscaEmArquivo(arquivoDados, arquivoIndice, qtd);
     
         if(resultado == 0)
         {
