@@ -5,11 +5,11 @@
 #define MAXIMO 500
 
 
-int ler_arquivo_binario(char *nome_do_arquivo)
+int lerArquivoBinario(char *nomeDoArquivo)
 {
     // Abre o arquivo e verifica se conseguiu abrir corretamente
     FILE *arq;
-    arq = fopen(nome_do_arquivo, "rb");
+    arq = fopen(nomeDoArquivo, "rb");
     if (arq == NULL)
     {
         return 0;
@@ -17,7 +17,7 @@ int ler_arquivo_binario(char *nome_do_arquivo)
 
     // Lê o registro de cabeçalho
     CabecalhoPessoa *cabecalho;
-    cabecalho = le_cabecalho(arq);
+    cabecalho = leCabecalho(arq);
 
     //Se não houver registros retorna 1
     if(cabecalho->proxByteOffset == 0)
@@ -29,22 +29,22 @@ int ler_arquivo_binario(char *nome_do_arquivo)
     while (ftell(arq) < cabecalho->proxByteOffset)
     {
         // Le o registro atual
-        RegistroPessoa *registro_atual;
-        registro_atual = le_registro(arq); 
+        RegistroPessoa *registroAtual;
+        registroAtual = leRegistro(arq); 
 
         // Se estiver removido pula para o proximo
-        if (registro_atual->removido == '1')
+        if (registroAtual->removido == '1')
         {
-            fseek(arq, registro_atual->tamanhoRegistro, SEEK_CUR);
+            fseek(arq, registroAtual->tamanhoRegistro, SEEK_CUR);
         }
         // Senão imprime ele por completo
         else
         {
-            imprimir_saida(registro_atual);
+            imprimirSaida(registroAtual);
         }
-        free(registro_atual->nomePessoa);
-        free(registro_atual->nomeUsuario);
-        free(registro_atual);
+        free(registroAtual->nomePessoa);
+        free(registroAtual->nomeUsuario);
+        free(registroAtual);
     }
     fclose(arq);
     return 2;

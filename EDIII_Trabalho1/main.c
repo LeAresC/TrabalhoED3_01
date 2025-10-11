@@ -4,6 +4,7 @@
 #include "criar_indice.h"
 #include "criar_tabela.h"
 #include "auxiliares_busca.h"
+#define MAXIMO 500
 
 void binarioNaTela(char *nomeArquivoBinario);
 
@@ -55,15 +56,15 @@ int main () {
         scanf("%s", arquivo_bin);
 
         //Returna 2 se tudo certo, 1 se o não houver registro e 0 se houver erro na abertura do arquivo
-        resultado = ler_arquivo_binario(arquivo_bin);
+        resultado = lerArquivoBinario(arquivo_bin);
 
         if(resultado == 0)
         {
-            erro_abertura();
+            erroAbertura();
         }
         if(resultado == 1)
         {
-            erro_registro();  
+            erroRegistro();  
         }
 
     }
@@ -76,11 +77,11 @@ int main () {
         scanf("%s", arquivo_indice);
         scanf("%d", &qtd);
 
-        resultado = busca_em_arquivo(arquivo_dados, arquivo_indice, qtd);
+        resultado = buscaEmArquivo(arquivo_dados, arquivo_indice, qtd);
     
         if(resultado == 0)
         {
-            erro_abertura();
+            erroAbertura();
         }
     }
 }

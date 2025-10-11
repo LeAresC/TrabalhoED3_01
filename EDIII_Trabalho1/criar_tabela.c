@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "criar_tabela.h"
+#define MAXIMO 500
 
 
 // Função para comparar dois registros de índice pelo campo idPessoa
