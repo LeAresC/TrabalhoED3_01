@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -g -std=c11
+CFLAGS = -Wall -g -std=c11 -Wextra
 LDFLAGS =
 
 # Arquivos fonte (todos os .c no diretório)
