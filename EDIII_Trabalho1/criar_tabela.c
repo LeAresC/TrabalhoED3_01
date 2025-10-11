@@ -154,6 +154,8 @@ int criarTabela(const char *nomeArquivoCsv, const char *nomeArquivoDados, const 
     // Cabeçalho do arquivo de dados
     memset(&dataHeader, 0, sizeof(CabecalhoPessoa));
     dataHeader.status = '0';
+    dataHeader.quantidadePessoas = 0;
+    dataHeader.quantidadeRemovidos = 0;
     dataHeader.proxByteOffset = 17;
     
     // Escreve cada campo do cabeçalho separadamente para evitar problemas de padding
@@ -174,7 +176,7 @@ int criarTabela(const char *nomeArquivoCsv, const char *nomeArquivoDados, const 
     // Pular o cabeçalho do CSV
     fgets(cabecalhoCsv, sizeof(cabecalhoCsv), arquivoCsv);
 
-
+    // Inicializa variáveis para o array de índices e leitura dos registros
     arrayIndice = NULL;
     contadorIndice = 0;
     capacidadeIndice = 0;
