@@ -160,4 +160,8 @@ int main()
             binarioNaTela(arquivoIndice);
         }
     }
+    if(funcionalidade == 7)
+    {
+        
+    }
 }

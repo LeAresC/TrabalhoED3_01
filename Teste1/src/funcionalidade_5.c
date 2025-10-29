@@ -19,65 +19,84 @@ int removeArquivoPessoa(char *arquivoDados, char *arquivoIndice, int N)
 
     RegistroIndice **DadosIndice = leArquivoIndice(arqI, Cabecalho->quantidadePessoas);
 
-    int **Offsets = (int **) malloc(sizeof(int*) * N);
+    long **Offsets = (long **)malloc(sizeof(long *) * N);
 
     int tamanhoIndice = Cabecalho->quantidadePessoas;
     for (int i = 0; i < N; i++)
     {
-      Offsets[i] = buscaDados(arqD, DadosIndice);
+        int cnt;
+        char nomeCampo[MAXIMO];
+        char valorCampo[MAXIMO];
+        scanf("%d %999[^=]=", &cnt, nomeCampo);
+        scanQuoteString(valorCampo);
+        Offsets[i] = buscaDados(arqD, DadosIndice, nomeCampo, valorCampo);
     }
-
-    int IndicesRetirados[MAXIMO];
-    int Contador = 0;
-    for(int i = 0; i < N; i++)
+    for (int i = 0; i < N; i++)
     {
-        for(int j = 0; j < MAXIMO; j++)
+        for (int j = 0; j < MAXIMO; j++)
         {
-            if(Offsets[i][j] == -1) 
-            break;
+            if (Offsets[i][j] == -1)
+                break;
 
-            char removido = '1';
-            int tamanhoRegistro;
-            int idPessoa;
             fseek(arqD, Offsets[i][j], SEEK_SET);
-            fwrite(&removido, sizeof(char), 1, arqD);
 
-            fseek(arqD, Offsets[i][j] + sizeof(char), SEEK_SET);
-            fread(&tamanhoRegistro, sizeof(int), 1, arqD);
-            fread(&idPessoa, sizeof(int), 1 , arqD);
+            RegistroPessoa *RegistroAtual = leRegistroPessoa(arqD);
 
-            long long int offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, idPessoa);
-            IndicesRetirados[Contador] = offsetIndice;
-            Contador++;
+            if (RegistroAtual->removido != '1')
+            {
+                
+                //Lida com o lixo no inicio do registro
+                fseek(arqD, Offsets[i][j], SEEK_SET);
+                long cnt = 0;
+                char aux = '$';
+                while (aux == '$')
+                {
+                    fread(&aux, sizeof(char), 1, arqD);
+                    cnt++;
+                }
+                RegistroAtual->removido = '1';
+                fseek(arqD, Offsets[i][j] + cnt - 1, SEEK_SET);
+                fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
 
-            Cabecalho->quantidadePessoas--;
-            Cabecalho->quantidadeRemovidos++;
+                long offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa);
+                DadosIndice[offsetIndice]->byteOffset = -1;
+                Cabecalho->quantidadePessoas--;
+                Cabecalho->quantidadeRemovidos++;
+
+                free(RegistroAtual->nomePessoa);
+                free(RegistroAtual->nomeUsuario);
+            }
+            free(RegistroAtual);
         }
     }
-    fseek(arqD, 1 , SEEK_SET);
+    for (int i = 0; i < tamanhoIndice; i++)
+    {
+        if (DadosIndice[i]->byteOffset == -1)
+        {
+            DadosIndice[i]->idPessoa = INF;
+        }
+    }
+
+    char estabilidade = '1';
+    fseek(arqD, 0, SEEK_SET);
+    fwrite(&estabilidade, sizeof(char), 1, arqD);
     fwrite(&Cabecalho->quantidadePessoas, sizeof(int), 1, arqD);
     fwrite(&Cabecalho->quantidadeRemovidos, sizeof(int), 1, arqD);
-
-    for(int i = 0; i < Contador; i++)
-    {
-        if(IndicesRetirados[i] >= 0)
-        DadosIndice[IndicesRetirados[i]]->idPessoa = INF;
-    }
     qsort(DadosIndice, tamanhoIndice, sizeof(RegistroIndice *), compararIndicePorID);
 
     fclose(arqI);
 
-    if(!escreveIndice(arquivoIndice, DadosIndice, Cabecalho->quantidadePessoas))
+    if (!escreveIndice(arquivoIndice, DadosIndice, Cabecalho->quantidadePessoas))
     {
         return 0;
     }
-    for(int i = 0; i < N; i++)
+    for (int i = 0; i < N; i++)
     {
         free(Offsets[i]);
     }
     free(Offsets);
     free(Cabecalho);
-    for(int i = 0; i < MAXIMO; i++)
+    for (int i = 0; i < MAXIMO; i++)
     {
         free(DadosIndice[i]);
     }

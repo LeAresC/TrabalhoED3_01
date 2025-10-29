@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "auxiliares_busca.h"
-#define MAXIMO 500
+#define MAXIMO 1000
 
 RegistroPessoa ***buscaNDados(char *arquivoDados, char *arquivoIndice, int N)
 {
@@ -21,12 +21,17 @@ RegistroPessoa ***buscaNDados(char *arquivoDados, char *arquivoIndice, int N)
     for (int i = 0; i < N; i++)
     {
         RetornoDados[i] = (RegistroPessoa **)malloc(sizeof(RegistroPessoa *) * (Cabecalho->quantidadePessoas + 1));
-        int *Offsets = buscaDados(arqD, DadosIndice);
+        int cnt;
+        char nomeCampo[MAXIMO];
+        char valorCampo[MAXIMO];
+        scanf("%d %999[^=]=", &cnt, nomeCampo);
+        scanQuoteString(valorCampo);
+        long *Offsets = buscaDados(arqD, DadosIndice, nomeCampo, valorCampo);
         for (int j = 0; j < MAXIMO; j++)
         {
             if (Offsets[j] == -1)
             {
-                RetornoDados[i][j] = (RegistroPessoa*)malloc(sizeof(RegistroPessoa));
+                RetornoDados[i][j] = (RegistroPessoa *)malloc(sizeof(RegistroPessoa));
                 RetornoDados[i][j]->removido = -2;
                 break;
             }

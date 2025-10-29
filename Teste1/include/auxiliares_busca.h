@@ -11,7 +11,7 @@ void erroAbertura();
 void erroRegistro();
 void imprimirSaida(RegistroPessoa *registroAtual);
 void scanQuoteString(char *str);
-int *buscaDados(FILE *arqD,RegistroIndice **DadosIndice);
+long *buscaDados(FILE *arqD,RegistroIndice **DadosIndice, char *nomeCampo, char *valorCampo);
 int buscaBinariaIndice(RegistroIndice** ArquivoIndice, int tamanhoVetor, int valorCampo);
 
 #endif // AUXILIARES_BUSCA_H

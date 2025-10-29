@@ -36,10 +36,10 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
         char buffer1[MAXIMO];
         char buffer2[MAXIMO];
 
-        scanf("%d %[^,],", &cnt, buffer1);
+        scanf("%d %999[^,],", &cnt, buffer1);
         scanQuoteString(novoDado->nomePessoa);
         char aux;
-        scanf("%c %[^,],", &aux, buffer2);
+        scanf("%c %999[^,],", &aux, buffer2);
         scanQuoteString(novoDado->nomeUsuario);
 
         novoDado->tamanhoNomePessoa = strlen(novoDado->nomePessoa);

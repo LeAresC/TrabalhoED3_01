@@ -157,18 +157,12 @@ int buscaBinariaIndice(RegistroIndice **ArquivoIndice, int tamanhoVetor, int val
     return -1;
 }
 
-int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
+long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char *valorCampo)
 {
-    // Le e separa o nome campo do valor campo do input
-    int cnt;
-    char nomeCampo[MAXIMO];
-    char valorCampo[MAXIMO];
-    scanf("%d %[^=]=", &cnt, nomeCampo);
-    scanQuoteString(valorCampo);
     fseek(arqD, 0, SEEK_SET);
     CabecalhoPessoa *Cabecalho = leCabecalhoPessoa(arqD);
     // Declara a lista de Offsets encontrados e define um contador da quantidade de registros encontraodr
-    int *DadosEncontrados = (int *)malloc(sizeof(int) * (MAXIMO));
+    long *DadosEncontrados = (long *)malloc(sizeof(long) * (MAXIMO));
     for (int i = 0; i < MAXIMO; i++)
     {
         DadosEncontrados[i] = -1;
@@ -182,12 +176,11 @@ int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
     {
         // Procura por o offset correspondente ao ID, se não encontrar retorna -1
         int valorID = atoi(valorCampo);
-        long long int offset = buscaBinariaIndice(DadosIndice, Cabecalho->quantidadePessoas, valorID);
+        long offset = buscaBinariaIndice(DadosIndice, Cabecalho->quantidadePessoas, valorID);
         if (offset != -1)
+        {
             DadosEncontrados[Contador] = DadosIndice[offset]->byteOffset;
-        else
-            DadosEncontrados[Contador] = -1;
-        Contador++;
+        }
     }
     // Se a procura for por idade nome e usuario
     else
@@ -197,13 +190,14 @@ int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
         while (Cabecalho->proxByteOffset > ftell(arqD))
         {
             // Le o registro atual
-            int RRN = ftell(arqD);
+            long Byteoffset = ftell(arqD);
             RegistroPessoa *registroAtual = leRegistroPessoa(arqD);
 
             // Se o registro atual estiver removido pula para o próximo
             if (registroAtual->removido == '1')
             {
                 fseek(arqD, registroAtual->tamanhoRegistro, SEEK_CUR);
+                free(registroAtual);
                 continue;
             }
 
@@ -214,7 +208,7 @@ int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
                 {
                     if (registroAtual->idadePessoa == -1)
                     {
-                        DadosEncontrados[Contador] = RRN;
+                        DadosEncontrados[Contador] = Byteoffset;
                         Contador++;
                     }
                 }
@@ -222,7 +216,7 @@ int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
                 {
                     if (atoi(valorCampo) == registroAtual->idadePessoa)
                     {
-                        DadosEncontrados[Contador] = RRN;
+                        DadosEncontrados[Contador] = Byteoffset;
                         Contador++;
                     }
                 }
@@ -231,7 +225,7 @@ int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
             {
                 if (((strlen(valorCampo) == 0) && strcmp(registroAtual->nomePessoa, "-") == 0) || (strcmp(registroAtual->nomePessoa, valorCampo) == 0))
                 {
-                    DadosEncontrados[Contador] = RRN;
+                    DadosEncontrados[Contador] = Byteoffset;
                     Contador++;
                 }
             }
@@ -239,7 +233,7 @@ int *buscaDados(FILE *arqD, RegistroIndice **DadosIndice)
             {
                 if (((strlen(valorCampo) == 0) && strcmp(registroAtual->nomeUsuario, "-") == 0) || (strcmp(registroAtual->nomeUsuario, valorCampo) == 0))
                 {
-                    DadosEncontrados[Contador] = RRN;
+                    DadosEncontrados[Contador] = Byteoffset;
                     Contador++;
                 }
             }
