@@ -162,6 +162,18 @@ int main()
     }
     if(funcionalidade == 7)
     {
-        
+        char arquivoDados[MAXIMO], arquivoIndice[MAXIMO];
+        int N;
+        scanf("%s %s %d", arquivoDados, arquivoIndice, &N);
+        resultado = atualizaArquivos(arquivoDados, arquivoIndice, N);
+        if(resultado == 0)
+        {
+            erroAbertura();
+        }
+        else
+        {
+            binarioNaTela(arquivoDados);
+            binarioNaTela(arquivoIndice);
+        }
     }
 }

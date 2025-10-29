@@ -53,17 +53,7 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
         novoDado->tamanhoRegistro = 16 + novoDado->tamanhoNomePessoa + novoDado->tamanhoNomeUsuario;
         int offset = ftell(arqD);
 
-        fwrite(&novoDado->removido, sizeof(char), 1, arqD);
-        fwrite(&novoDado->tamanhoRegistro, sizeof(int), 1, arqD);
-        fwrite(&novoDado->idPessoa, sizeof(int), 1, arqD);
-        fwrite(&novoDado->idadePessoa, sizeof(int), 1, arqD);
-        fwrite(&novoDado->tamanhoNomePessoa, sizeof(int), 1, arqD);
-        fwrite(novoDado->nomePessoa,  sizeof(char), novoDado->tamanhoNomePessoa, arqD);
-        fwrite(&novoDado->tamanhoNomeUsuario, sizeof(int), 1, arqD);
-        fwrite(novoDado->nomeUsuario, sizeof(char), novoDado->tamanhoNomeUsuario, arqD);
-        DadosIndice[Cabecalho->quantidadePessoas] = malloc(sizeof(RegistroIndice));
-        DadosIndice[Cabecalho->quantidadePessoas]->idPessoa = novoDado->idPessoa;
-        DadosIndice[Cabecalho->quantidadePessoas]->byteOffset = offset;
+        insereFinal(arqD, novoDado, DadosIndice, Cabecalho->quantidadePessoas, offset);
         Cabecalho->quantidadePessoas++;
         free(novoDado);
     }

@@ -37,36 +37,9 @@ int removeArquivoPessoa(char *arquivoDados, char *arquivoIndice, int N)
         {
             if (Offsets[i][j] == -1)
                 break;
-
-            fseek(arqD, Offsets[i][j], SEEK_SET);
-
-            RegistroPessoa *RegistroAtual = leRegistroPessoa(arqD);
-
-            if (RegistroAtual->removido != '1')
-            {
-                
-                //Lida com o lixo no inicio do registro
-                fseek(arqD, Offsets[i][j], SEEK_SET);
-                long cnt = 0;
-                char aux = '$';
-                while (aux == '$')
-                {
-                    fread(&aux, sizeof(char), 1, arqD);
-                    cnt++;
-                }
-                RegistroAtual->removido = '1';
-                fseek(arqD, Offsets[i][j] + cnt - 1, SEEK_SET);
-                fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
-
-                long offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa);
-                DadosIndice[offsetIndice]->byteOffset = -1;
-                Cabecalho->quantidadePessoas--;
-                Cabecalho->quantidadeRemovidos++;
-
-                free(RegistroAtual->nomePessoa);
-                free(RegistroAtual->nomeUsuario);
-            }
-            free(RegistroAtual);
+            removeRegistroOffset(arqD, Offsets[i][j], DadosIndice, tamanhoIndice);
+            Cabecalho->quantidadePessoas--;
+            Cabecalho->quantidadeRemovidos++;
         }
     }
     for (int i = 0; i < tamanhoIndice; i++)
