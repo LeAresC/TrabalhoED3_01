@@ -5,7 +5,7 @@ typedef struct {
     char status; // 1 byte: '0' inconsistente, '1' consistente
     int quantidadePessoas; // 4 bytes
     int quantidadeRemovidos; // 4 bytes
-    long proxByteOffset; // 8 bytes
+    long long int proxByteOffset; // 8 bytes
 } CabecalhoPessoa;
 
 typedef struct {
@@ -25,7 +25,7 @@ typedef struct {
 
 typedef struct {
     int idPessoa; // 4 bytes
-    long byteOffset; // 8 bytes
+    long long int byteOffset; // 8 bytes
 } RegistroIndice;
 
 #endif // DATA_STRUCTS_H

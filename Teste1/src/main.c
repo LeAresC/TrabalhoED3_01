@@ -6,10 +6,14 @@
 #include "criar_indice.h"
 #include "criar_tabela.h"
 #include "auxiliares_busca.h"
+#include "funcionalidade_3.h"
 #include "funcionalidade_4.h"
+#include "funcionalidade_5.h"
+#include "funcionalidade_6.h"
+#include "utilidades.h"
 #define MAXIMO 500
 
-void binarioNaTela(char *nomeArquivoBinario);
+
 
 int main()
 {
@@ -119,5 +123,41 @@ int main()
                 }    
             }
         free(ListaDados);
+    }
+    if(funcionalidade == 5)
+    {
+        char arquivoDados[MAXIMO];
+        char arquivoIndice[MAXIMO];
+        int N;
+        scanf("%s", arquivoDados);
+        scanf("%s", arquivoIndice);
+        scanf("%d", &N);
+        resultado = removeArquivoPessoa(arquivoDados, arquivoIndice, N);
+        if(resultado == 0)
+        {
+            erroAbertura();
+        }
+        else
+        {
+            binarioNaTela(arquivoDados);
+            binarioNaTela(arquivoIndice);   
+        }
+
+    }
+    if(funcionalidade == 6)
+    {
+        char arquivoDados[MAXIMO], arquivoIndice[MAXIMO];
+        int N;
+        scanf("%s %s %d", arquivoDados, arquivoIndice, &N);
+        resultado = insereNoFinal(arquivoDados, arquivoIndice, N);
+        if(resultado == 0)
+        {
+            erroAbertura();
+        }
+        else
+        {
+            binarioNaTela(arquivoDados);
+            binarioNaTela(arquivoIndice);
+        }
     }
 }
