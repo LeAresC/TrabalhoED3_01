@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "data_structs.h"
 #include "criar_indice.h"
 
 int criarIndice(const char *nomeArquivo){

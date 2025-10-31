@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "data_structs.h"
 #include "criar_tabela.h"
 #include "utils.h"
 #define MAXIMO 500
@@ -18,7 +19,7 @@ static int compararRegistrosIndice(const void *a, const void *b) {
     return 0;
 }
 
-RegistroPessoa* lerRegistroCsv(FILE *arquivoCsv) {
+static RegistroPessoa* lerRegistroCsv(FILE *arquivoCsv) {
     // Declaração de variáveis
     char linha[256], *campo;
     char *linha_ptr;
