@@ -4,7 +4,7 @@
 #include "auxiliares_busca.h"
 #include "auxiliares_escrita.h"
 #include "utilidades.h"
-#define MAXIMO 1000
+#define MAXIMO 2000
 
 int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
 {
@@ -16,12 +16,9 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
     }
     CabecalhoPessoa *Cabecalho = leCabecalhoPessoa(arqD);
 
-    char instavel = '1';
-    fwrite(&instavel, sizeof(char), 1, arqI);
-
     RegistroIndice **DadosIndice = leArquivoIndice(arqI, Cabecalho->quantidadePessoas);
-
     fseek(arqD, Cabecalho->proxByteOffset, SEEK_SET);
+
     for (int i = 0; i < N; i++)
     {
 
@@ -46,39 +43,26 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
         novoDado->tamanhoNomeUsuario = strlen(novoDado->nomeUsuario);
 
         novoDado->idPessoa = atoi(buffer1);
-        if(strcmp(buffer2, "NULO") != 0)
-        novoDado->idadePessoa = atoi(buffer2);
-        else novoDado->idadePessoa = -1;
+        if (strcmp(buffer2, "NULO") != 0)
+            novoDado->idadePessoa = atoi(buffer2);
+        else
+            novoDado->idadePessoa = -1;
 
         novoDado->tamanhoRegistro = 16 + novoDado->tamanhoNomePessoa + novoDado->tamanhoNomeUsuario;
-        int offset = ftell(arqD);
+        long offset = ftell(arqD);
 
-        insereFinal(arqD, novoDado, DadosIndice, Cabecalho->quantidadePessoas, offset);
+        insereFinalPessoa(arqD, novoDado, offset);
+        DadosIndice[Cabecalho->quantidadePessoas] = malloc(sizeof(RegistroIndice));
+        insereFinalIndice(DadosIndice, Cabecalho->quantidadePessoas, novoDado->idPessoa, offset);
+
         Cabecalho->quantidadePessoas++;
+        Cabecalho->proxByteOffset = ftell(arqD);
         free(novoDado);
     }
-    long long int offset = ftell(arqD);
-
-    Cabecalho->status = '1';
-    fseek(arqD, 0, SEEK_SET);
-    fwrite(&Cabecalho->status, sizeof(char), 1, arqD);
-    fwrite(&Cabecalho->quantidadePessoas, sizeof(int), 1, arqD);
-    fseek(arqD, 9, SEEK_SET);
-    fwrite(&offset, sizeof(long long int), 1 , arqD);
-
+    atualizaCabecalhoPessoa(arqD, Cabecalho);
     fclose(arqI);
-
-    qsort(DadosIndice, Cabecalho->quantidadePessoas, sizeof(RegistroIndice *), compararIndicePorID);
-    if(!escreveIndice(arquivoIndice, DadosIndice, Cabecalho->quantidadePessoas))
-    {
-        return 0;
-    }
-
+    escreveIndice(arquivoIndice, DadosIndice, Cabecalho->quantidadePessoas);
     free(Cabecalho);
-    for(int i = 0; i < MAXIMO; i++)
-    {
-        free(DadosIndice[i]);
-    }
     free(DadosIndice);
     fclose(arqD);
     return 1;

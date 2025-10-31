@@ -4,16 +4,38 @@
 #include <ctype.h>
 #include "auxiliares_busca.h"
 #include "utilidades.h"
-#define MAXIMO 1000
+#define MAXIMO 2000
+
+void leInput(char *nomeCampo, char *valorCampo)
+{
+    scanf(" %999[^=]=", nomeCampo);
+    if ((strcmp(nomeCampo, "nomePessoa") == 0) || (strcmp(nomeCampo, "nomeUsuario") == 0))
+        scanQuoteString(valorCampo);
+    else
+        scanf("%s", valorCampo);
+
+    char string_nula[] = "";
+    if(strcmp(valorCampo, "NULO") == 0)
+    {
+        strcpy(valorCampo, string_nula);
+    }
+}
+
+void descartaLixo(FILE *arqD)
+{
+    char aux;
+    do
+    {
+        fread(&aux, sizeof(char), 1, arqD);
+    } while (aux == '$');
+    fseek(arqD, -1, SEEK_CUR);
+}
 
 RegistroPessoa *leRegistroPessoa(FILE *arq)
 {
     // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
     RegistroPessoa *registroAtual = (RegistroPessoa *)malloc(sizeof(RegistroPessoa));
-    do
-    {
-        fread(&registroAtual->removido, sizeof(char), 1, arq);
-    } while (registroAtual->removido == '$');
+    fread(&registroAtual->removido, sizeof(char), 1, arq);
     fread(&registroAtual->tamanhoRegistro, sizeof(int), 1, arq);
 
     // So o registro atual foi removido retorna o registroAtual como está
@@ -28,7 +50,7 @@ RegistroPessoa *leRegistroPessoa(FILE *arq)
     fread(&registroAtual->tamanhoNomePessoa, sizeof(int), 1, arq);
 
     // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
-    registroAtual->nomePessoa = malloc(sizeof(char) * (registroAtual->tamanhoNomePessoa + 1));
+    registroAtual->nomePessoa = malloc(sizeof(char) * (MAXIMO));
 
     // Se não houver nome copia "-" para o registroAtual
     if (registroAtual->tamanhoNomePessoa == 0)
@@ -46,7 +68,7 @@ RegistroPessoa *leRegistroPessoa(FILE *arq)
     fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
 
     // Aloca espaço para o nomeusuario = tamanhoNomeUsuario + (1byte) do \0
-    registroAtual->nomeUsuario = malloc(sizeof(char) * (registroAtual->tamanhoNomeUsuario + 1));
+    registroAtual->nomeUsuario = malloc(sizeof(char) * (MAXIMO));
 
     // Se não houver usuario copia "-" para o registroAtual
     if (registroAtual->tamanhoNomeUsuario == 0)
@@ -168,9 +190,7 @@ long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char
         DadosEncontrados[i] = -1;
     }
     int Contador = 0;
-
     // Seta o ponteiro do arquivo pro começo o cabecalho
-
     // Se a procura for por ID realiza uma busca binaria para achar o RRN correspondente
     if (strcmp(nomeCampo, "idPessoa") == 0)
     {
@@ -190,9 +210,9 @@ long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char
         while (Cabecalho->proxByteOffset > ftell(arqD))
         {
             // Le o registro atual
+            descartaLixo(arqD);
             long Byteoffset = ftell(arqD);
             RegistroPessoa *registroAtual = leRegistroPessoa(arqD);
-
             // Se o registro atual estiver removido pula para o próximo
             if (registroAtual->removido == '1')
             {

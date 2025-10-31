@@ -3,7 +3,17 @@
 #include <string.h>
 #include "data_structs.h"
 #include "auxiliares_busca.h"
+#define MAXIMO 2000
 #define INF 1e9
+
+void insereLixoFinalRegistro(FILE *arqD, int QuantidadeDeLixo)
+{
+    char Lixo = '$';
+    for (int i = 0; i < QuantidadeDeLixo; i++)
+    {
+        fwrite(&Lixo, sizeof(char), 1, arqD);
+    }
+}
 
 // Função de comparação para um array de PONTEIROS (RegistroIndice **)
 int compararIndicePorID(const void *a, const void *b)
@@ -33,11 +43,9 @@ int compararIndicePorID(const void *a, const void *b)
         return 0;
     }
 }
-int escreveIndice(char *arquivoIndice, RegistroIndice **DadosIndice, int tamanhoArquivoIndice)
+void escreveIndice(char *arquivoIndice, RegistroIndice **DadosIndice, int tamanhoArquivoIndice)
 {
     FILE *arqI = fopen(arquivoIndice, "wb");
-    if (arqI == NULL)
-        return 0;
     CabecalhoIndice Cabecalho;
     Cabecalho.status = '1';
     memset(Cabecalho.lixo, '$', sizeof(Cabecalho.lixo));
@@ -50,41 +58,21 @@ int escreveIndice(char *arquivoIndice, RegistroIndice **DadosIndice, int tamanho
         fwrite(&DadosIndice[i]->byteOffset, sizeof(long long int), 1, arqI);
     }
     fclose(arqI);
-    return 1;
 }
 
-void removeRegistroOffset(FILE *arqD, long ByteOffset, RegistroIndice **DadosIndice, int tamanhoIndice)
+void removeRegistroOffsetPessoa(FILE *arqD, long ByteOffset, RegistroPessoa *RegistroAtual)
 {
+
+    // Lida com o lixo no inicio do registro
     fseek(arqD, ByteOffset, SEEK_SET);
-
-    RegistroPessoa *RegistroAtual = leRegistroPessoa(arqD);
-
-    if (RegistroAtual->removido != '1')
-    {
-
-        // Lida com o lixo no inicio do registro
-        fseek(arqD, ByteOffset, SEEK_SET);
-        long cnt = 0;
-        char aux = '$';
-        while (aux == '$')
-        {
-            fread(&aux, sizeof(char), 1, arqD);
-            cnt++;
-        }
-        RegistroAtual->removido = '1';
-        fseek(arqD, ByteOffset + cnt - 1, SEEK_SET);
-        fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
-
-        long offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa);
-        DadosIndice[offsetIndice]->byteOffset = -1;
-
-        free(RegistroAtual->nomePessoa);
-        free(RegistroAtual->nomeUsuario);
-    }
-    free(RegistroAtual);
+    RegistroAtual->removido = '1';
+    // Apaga do Arquivo Pessoa
+    fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
 }
-void insereFinal(FILE *arqD, RegistroPessoa *RegistroAtual, RegistroIndice **DadosIndice, int tamanhoIndice, long offset)
+void insereFinalPessoa(FILE *arqD, RegistroPessoa *RegistroAtual, long Offset)
 {
+    fseek(arqD, Offset, SEEK_SET);
+    RegistroAtual->removido = '0';
     fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
     fwrite(&RegistroAtual->tamanhoRegistro, sizeof(int), 1, arqD);
     fwrite(&RegistroAtual->idPessoa, sizeof(int), 1, arqD);
@@ -93,7 +81,47 @@ void insereFinal(FILE *arqD, RegistroPessoa *RegistroAtual, RegistroIndice **Dad
     fwrite(RegistroAtual->nomePessoa, sizeof(char), RegistroAtual->tamanhoNomePessoa, arqD);
     fwrite(&RegistroAtual->tamanhoNomeUsuario, sizeof(int), 1, arqD);
     fwrite(RegistroAtual->nomeUsuario, sizeof(char), RegistroAtual->tamanhoNomeUsuario, arqD);
-    DadosIndice[tamanhoIndice] = malloc(sizeof(RegistroIndice));
-    DadosIndice[tamanhoIndice]->idPessoa = RegistroAtual->idPessoa;
-    DadosIndice[tamanhoIndice]->byteOffset = offset;
+}
+void insereMeioPessoa(FILE *arqD, long ByteOffset, RegistroPessoa *RegistroAtual)
+{
+    fseek(arqD, ByteOffset, SEEK_SET);
+    fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
+    fwrite(&RegistroAtual->tamanhoRegistro, sizeof(int), 1, arqD);
+    fwrite(&RegistroAtual->idPessoa, sizeof(int), 1, arqD);
+    fwrite(&RegistroAtual->idadePessoa, sizeof(int), 1, arqD);
+    fwrite(&RegistroAtual->tamanhoNomePessoa, sizeof(int), 1, arqD);
+    fwrite(RegistroAtual->nomePessoa, sizeof(char), RegistroAtual->tamanhoNomePessoa, arqD);
+    fwrite(&RegistroAtual->tamanhoNomeUsuario, sizeof(int), 1, arqD);
+    fwrite(RegistroAtual->nomeUsuario, sizeof(char), RegistroAtual->tamanhoNomeUsuario, arqD);
+    int tamanhoTotal = RegistroAtual->tamanhoRegistro;
+    int tamanhoValido = 16 + RegistroAtual->tamanhoNomePessoa + RegistroAtual->tamanhoNomeUsuario;
+    insereLixoFinalRegistro(arqD, tamanhoTotal - tamanhoValido);
+}
+void insereFinalIndice(RegistroIndice **DadosIndice, int tamanhoIndice, int ID, long byteOffset)
+{
+    DadosIndice[tamanhoIndice]->idPessoa = ID;
+    DadosIndice[tamanhoIndice]->byteOffset = byteOffset;
+    qsort(DadosIndice, tamanhoIndice, sizeof(RegistroIndice *), compararIndicePorID);
+}
+void removeRegistroOffsetIndice(RegistroIndice **DadosIndice, int tamanhoIndice, int ID)
+{
+    // Sinaliza que apagou no arquivo de Indice
+    long offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, ID);
+    DadosIndice[offsetIndice]->idPessoa = INF;
+    qsort(DadosIndice, tamanhoIndice, sizeof(RegistroIndice *), compararIndicePorID);
+}
+void atualizaNoIndice(RegistroIndice **DadosIndice, int tamanhoIndice, int idAtual, int Offset, int idAnterior)
+{
+    long offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, idAnterior);
+    DadosIndice[offsetIndice]->byteOffset = Offset;
+    DadosIndice[offsetIndice]->idPessoa = idAtual;
+    qsort(DadosIndice, tamanhoIndice, sizeof(RegistroIndice *), compararIndicePorID);
+}
+void atualizaCabecalhoPessoa(FILE *arqD, CabecalhoPessoa *CabecalhoP)
+{
+    fseek(arqD, 0, SEEK_SET);
+    fwrite(&CabecalhoP->status, sizeof(char), 1, arqD);
+    fwrite(&CabecalhoP->quantidadePessoas, sizeof(int), 1, arqD);
+    fwrite(&CabecalhoP->quantidadeRemovidos, sizeof(int), 1, arqD);
+    fwrite(&CabecalhoP->proxByteOffset, sizeof(long long int), 1, arqD);
 }

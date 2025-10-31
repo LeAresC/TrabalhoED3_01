@@ -10,6 +10,7 @@
 #include "funcionalidade_4.h"
 #include "funcionalidade_5.h"
 #include "funcionalidade_6.h"
+#include "funcionalidade_7.h"
 #include "utilidades.h"
 #define MAXIMO 500
 
@@ -86,52 +87,20 @@ int main()
     if (funcionalidade == 4)
     {
         // Le os dados
-        char arquivoDados[MAXIMO];
-        char arquivoIndice[MAXIMO];
+        char arquivoDados[MAXIMO], arquivoIndice[MAXIMO];
         int N;
-        scanf("%s", arquivoDados);
-        scanf("%s", arquivoIndice);
-        scanf("%d", &N);
-
-        // Retorna uma lista com as se tudo certo e NULL se houver erro na abertura
-        RegistroPessoa ***ListaDados = buscaNDados(arquivoDados, arquivoIndice, N);
-
-        if (ListaDados == NULL)
+        scanf("%s %s %d", arquivoDados, arquivoIndice, &N);
+        resultado = buscaNDados(arquivoDados, arquivoIndice, N);
+        if (resultado == 0)
         {
             erroAbertura();
         }
-        else
-            for (int i = 0; i < N; i++)
-            {
-                int flag = 0;
-                for(int j = 0; j < MAXIMO; j++)
-                {
-                    if(ListaDados[i][j]->removido == -2)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        imprimirSaida(ListaDados[i][j]);
-                        flag = 1;
-                    }
-                }   
-                if(!flag)
-                {
-                    erroRegistro();
-                    printf("\n");
-                }    
-            }
-        free(ListaDados);
     }
     if(funcionalidade == 5)
     {
-        char arquivoDados[MAXIMO];
-        char arquivoIndice[MAXIMO];
+        char arquivoDados[MAXIMO], arquivoIndice[MAXIMO];
         int N;
-        scanf("%s", arquivoDados);
-        scanf("%s", arquivoIndice);
-        scanf("%d", &N);
+        scanf("%s %s %d", arquivoDados, arquivoIndice, &N);
         resultado = removeArquivoPessoa(arquivoDados, arquivoIndice, N);
         if(resultado == 0)
         {

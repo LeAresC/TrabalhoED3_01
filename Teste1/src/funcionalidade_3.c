@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "auxiliares_busca.h"
-#define MAXIMO 500
+#define MAXIMO 2000
 
 
 int lerArquivoBinario(char *nomeDoArquivo)
@@ -27,6 +27,7 @@ int lerArquivoBinario(char *nomeDoArquivo)
     while (ftell(arq) < cabecalho->proxByteOffset)
     {
         // Le o registro atual
+        descartaLixo(arq);
         RegistroPessoa *registroAtual = leRegistroPessoa(arq); 
         // Se estiver removido pula para o proximo
         if (registroAtual->removido == '1')
