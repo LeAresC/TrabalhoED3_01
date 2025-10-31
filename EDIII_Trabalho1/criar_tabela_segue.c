@@ -34,7 +34,7 @@ static RegistroSegue* lerRegistroCsv(FILE *arquivoCsv) {
     // Campo idPessoaQueSegue, pode ser nulo
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
-        // Campo nulo, definir idadePessoa como -1
+        // Campo nulo, definir idPessoaQueSegue como -1
         registro->idPessoaQueSegue = -1;
     } else {
         // Campo não nulo
@@ -45,7 +45,7 @@ static RegistroSegue* lerRegistroCsv(FILE *arquivoCsv) {
     // Campo idPessoaQueESeguida, pode ser nulo
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
-        // Campo nulo, definir idadePessoa como -1
+        // Campo nulo, definir idPessoaQueESeguida como -1
         registro->idPessoaQueESeguida = -1;
     } else {
         // Campo não nulo
@@ -134,7 +134,7 @@ int criarTabelaSegue(const char *nomeArquivoCsv, const char *nomeArquivoDados) {
     // Pular o cabeçalho do CSV
     fgets(cabecalhoCsv, sizeof(cabecalhoCsv), arquivoCsv);
 
-    // Inicializa variáveis para o array de índices e leitura dos registros
+    // Inicializa registro
     registro = NULL;
 
     // Cada iteração já lê e processa um registro do CSV
