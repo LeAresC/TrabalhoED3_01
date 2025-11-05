@@ -60,29 +60,14 @@ void escreveIndice(char *arquivoIndice, RegistroIndice **DadosIndice, int tamanh
     fclose(arqI);
 }
 
-void removeRegistroOffsetPessoa(FILE *arqD, long ByteOffset, RegistroPessoa *RegistroAtual)
+void removeRegistroOffsetPessoa(FILE *arqD, long ByteOffset)
 {
-
-    // Lida com o lixo no inicio do registro
     fseek(arqD, ByteOffset, SEEK_SET);
-    RegistroAtual->removido = '1';
+    char aux = '1';
     // Apaga do Arquivo Pessoa
-    fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
+    fwrite(&aux, sizeof(char), 1, arqD);
 }
-void insereFinalPessoa(FILE *arqD, RegistroPessoa *RegistroAtual, long Offset)
-{
-    fseek(arqD, Offset, SEEK_SET);
-    RegistroAtual->removido = '0';
-    fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
-    fwrite(&RegistroAtual->tamanhoRegistro, sizeof(int), 1, arqD);
-    fwrite(&RegistroAtual->idPessoa, sizeof(int), 1, arqD);
-    fwrite(&RegistroAtual->idadePessoa, sizeof(int), 1, arqD);
-    fwrite(&RegistroAtual->tamanhoNomePessoa, sizeof(int), 1, arqD);
-    fwrite(RegistroAtual->nomePessoa, sizeof(char), RegistroAtual->tamanhoNomePessoa, arqD);
-    fwrite(&RegistroAtual->tamanhoNomeUsuario, sizeof(int), 1, arqD);
-    fwrite(RegistroAtual->nomeUsuario, sizeof(char), RegistroAtual->tamanhoNomeUsuario, arqD);
-}
-void insereMeioPessoa(FILE *arqD, long ByteOffset, RegistroPessoa *RegistroAtual)
+void inserePessoa(FILE *arqD, long ByteOffset, RegistroPessoa *RegistroAtual)
 {
     fseek(arqD, ByteOffset, SEEK_SET);
     fwrite(&RegistroAtual->removido, sizeof(char), 1, arqD);
@@ -110,9 +95,9 @@ void removeRegistroOffsetIndice(RegistroIndice **DadosIndice, int tamanhoIndice,
     DadosIndice[offsetIndice]->idPessoa = INF;
     qsort(DadosIndice, tamanhoIndice, sizeof(RegistroIndice *), compararIndicePorID);
 }
-void atualizaNoIndice(RegistroIndice **DadosIndice, int tamanhoIndice, int idAtual, int Offset, int idAnterior)
+void atualizaNoIndice(RegistroIndice **DadosIndice, int tamanhoIndice, int idAtual, long Offset, int idAnterior)
 {
-    long offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, idAnterior);
+    int offsetIndice = buscaBinariaIndice(DadosIndice, tamanhoIndice, idAnterior);
     DadosIndice[offsetIndice]->byteOffset = Offset;
     DadosIndice[offsetIndice]->idPessoa = idAtual;
     qsort(DadosIndice, tamanhoIndice, sizeof(RegistroIndice *), compararIndicePorID);

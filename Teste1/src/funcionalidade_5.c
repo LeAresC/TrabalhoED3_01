@@ -9,15 +9,14 @@
 int removeArquivoPessoa(char *arquivoDados, char *arquivoIndice, int N)
 {
     FILE *arqD = fopen(arquivoDados, "r+b");
-    FILE *arqI = fopen(arquivoIndice, "r+b");
-
+    FILE *arqI = fopen(arquivoIndice, "rb");
     if (arqD == NULL || arqI == NULL)
     {
         return 0;
     }
-    CabecalhoPessoa *Cabecalho = leCabecalhoPessoa(arqD);
+    CabecalhoPessoa *CabecalhoP = leCabecalhoPessoa(arqD);
 
-    RegistroIndice **DadosIndice = leArquivoIndice(arqI, Cabecalho->quantidadePessoas);
+    RegistroIndice **DadosIndice = leArquivoIndice(arqI, CabecalhoP->quantidadePessoas);
 
     for (int i = 0; i < N; i++)
     {
@@ -33,21 +32,24 @@ int removeArquivoPessoa(char *arquivoDados, char *arquivoIndice, int N)
                 break;
             fseek(arqD, Offsets[j], SEEK_SET);
             RegistroPessoa *RegistroAtual = leRegistroPessoa(arqD);
-            removeRegistroOffsetPessoa(arqD, Offsets[j], RegistroAtual);
-            removeRegistroOffsetIndice(DadosIndice, Cabecalho->quantidadePessoas, RegistroAtual->idPessoa);
-            Cabecalho->quantidadePessoas--;
-            Cabecalho->quantidadeRemovidos++;
+            removeRegistroOffsetPessoa(arqD, Offsets[j]);
+            removeRegistroOffsetIndice(DadosIndice, CabecalhoP->quantidadePessoas, RegistroAtual->idPessoa);
+            CabecalhoP->quantidadePessoas--;
+            CabecalhoP->quantidadeRemovidos++;
             free(RegistroAtual->nomePessoa);
             free(RegistroAtual->nomeUsuario);
             free(RegistroAtual);
+            atualizaCabecalhoPessoa(arqD, CabecalhoP);
         }
-        atualizaCabecalhoPessoa(arqD, Cabecalho);
     }
     fclose(arqI);
-    escreveIndice(arquivoIndice, DadosIndice, Cabecalho->quantidadePessoas);
-    free(Cabecalho);
+    escreveIndice(arquivoIndice, DadosIndice, CabecalhoP->quantidadePessoas);
+    for (int i = 0; i < CabecalhoP->quantidadePessoas; i++)
+    {
+        free(DadosIndice[i]);
+    }
     free(DadosIndice);
+    free(CabecalhoP);
     fclose(arqD);
-
     return 1;
 }

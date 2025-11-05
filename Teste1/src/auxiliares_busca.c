@@ -6,6 +6,20 @@
 #include "utilidades.h"
 #define MAXIMO 2000
 
+int determinarCampoBusca(char *nomeCampo)
+{
+    if(strcmp(nomeCampo, "idPessoa") == 0)
+    return 0;
+    if(strcmp(nomeCampo, "idadePessoa") == 0)
+    return 1;
+    if(strcmp(nomeCampo, "nomePessoa") == 0)
+    return 2;
+    if(strcmp(nomeCampo, "nomeUsuario") == 0)
+    return 3;
+    
+    return -1;
+}
+
 void leInput(char *nomeCampo, char *valorCampo)
 {
     scanf(" %999[^=]=", nomeCampo);
@@ -15,7 +29,7 @@ void leInput(char *nomeCampo, char *valorCampo)
         scanf("%s", valorCampo);
 
     char string_nula[] = "";
-    if(strcmp(valorCampo, "NULO") == 0)
+    if (strcmp(valorCampo, "NULO") == 0)
     {
         strcpy(valorCampo, string_nula);
     }
@@ -155,30 +169,31 @@ int buscaBinariaIndice(RegistroIndice **ArquivoIndice, int tamanhoVetor, int val
     while (l < r)
     {
         int id;
-        int mid = l + (r - l) / 2;
+        int indice = l + (r - l) / 2;
         // Le e armazena o ID e RRN atual correspondente
-        id = ArquivoIndice[mid]->idPessoa;
+        id = ArquivoIndice[indice]->idPessoa;
         // Se o id atual foir maior que o procurado r = mid
         if (id > valorId)
         {
-            r = mid;
+            r = indice;
         }
         // Do contrário se o id atual for menor que o procurado l = mid + 1
         else if (id < valorId)
         {
-            l = mid + 1;
+            l = indice + 1;
         }
 
         // Se encontrou o ID retorna o indice equivalente
         else if (id == valorId)
         {
-            return mid;
+            return indice;
         }
     }
     // Se não encontrou o ID retorna -1 (Inválido)
     return -1;
 }
 
+// Retorna uma lista de offsets
 long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char *valorCampo)
 {
     fseek(arqD, 0, SEEK_SET);
@@ -189,74 +204,83 @@ long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char
     {
         DadosEncontrados[i] = -1;
     }
+    // Seta um contador para a quantidade de dados encontrados
     int Contador = 0;
-    // Seta o ponteiro do arquivo pro começo o cabecalho
+    // Seta um contador para a quantidade de dados válidos(não removidos) lidos
+    int qtdDados = 0;
+    // Determina o campo de busca (0 = idPessoa; 1 = idadePessoa; 2 = nomePessoa; 3 = nomeUsuario)
+    int campoBusca = determinarCampoBusca(nomeCampo);
+    // Campo que verifica qual o offset atual;
+    long OffsetAtual = 17;
     // Se a procura for por ID realiza uma busca binaria para achar o RRN correspondente
-    if (strcmp(nomeCampo, "idPessoa") == 0)
+    if (campoBusca == 0)
     {
         // Procura por o offset correspondente ao ID, se não encontrar retorna -1
         int valorID = atoi(valorCampo);
-        long offset = buscaBinariaIndice(DadosIndice, Cabecalho->quantidadePessoas, valorID);
-        if (offset != -1)
+        int indice = buscaBinariaIndice(DadosIndice, Cabecalho->quantidadePessoas, valorID);
+        if (indice != -1)
         {
-            DadosEncontrados[Contador] = DadosIndice[offset]->byteOffset;
+            DadosEncontrados[Contador] = DadosIndice[indice]->byteOffset;
         }
     }
     // Se a procura for por idade nome e usuario
     else
     {
-
         // Busca sequencial no arquivo de dados até o seu fim
-        while (Cabecalho->proxByteOffset > ftell(arqD))
+        while (qtdDados < Cabecalho->quantidadePessoas)
         {
-            // Le o registro atual
+            //Descarta o lixo do final do registro anterior e posiciona o cursor corretamente
             descartaLixo(arqD);
-            long Byteoffset = ftell(arqD);
+            // Le o registro atual
             RegistroPessoa *registroAtual = leRegistroPessoa(arqD);
             // Se o registro atual estiver removido pula para o próximo
             if (registroAtual->removido == '1')
             {
                 fseek(arqD, registroAtual->tamanhoRegistro, SEEK_CUR);
+                OffsetAtual += registroAtual->tamanhoRegistro + 5;
                 free(registroAtual);
                 continue;
             }
 
             // Se não estiver removido verifica se a o registro atual satisfaz o filtro
-            else if (strcmp(nomeCampo, "idadePessoa") == 0)
+            else if (campoBusca == 1)
             {
-                if (strlen(valorCampo) == 0)
+                if (strlen(valorCampo) == 0 && registroAtual->idadePessoa == -1)
                 {
-                    if (registroAtual->idadePessoa == -1)
-                    {
-                        DadosEncontrados[Contador] = Byteoffset;
-                        Contador++;
-                    }
+                    DadosEncontrados[Contador] = OffsetAtual;
+                    Contador++;
                 }
                 else
                 {
                     if (atoi(valorCampo) == registroAtual->idadePessoa)
                     {
-                        DadosEncontrados[Contador] = Byteoffset;
+                        DadosEncontrados[Contador] = OffsetAtual;
                         Contador++;
                     }
                 }
             }
-            else if (strcmp(nomeCampo, "nomePessoa") == 0)
+            else if (campoBusca == 2)
             {
                 if (((strlen(valorCampo) == 0) && strcmp(registroAtual->nomePessoa, "-") == 0) || (strcmp(registroAtual->nomePessoa, valorCampo) == 0))
                 {
-                    DadosEncontrados[Contador] = Byteoffset;
+                    DadosEncontrados[Contador] = OffsetAtual;
                     Contador++;
                 }
             }
-            else if (strcmp(nomeCampo, "nomeUsuario") == 0)
+            else if (campoBusca == 3)
             {
                 if (((strlen(valorCampo) == 0) && strcmp(registroAtual->nomeUsuario, "-") == 0) || (strcmp(registroAtual->nomeUsuario, valorCampo) == 0))
                 {
-                    DadosEncontrados[Contador] = Byteoffset;
+                    DadosEncontrados[Contador] = OffsetAtual;
                     Contador++;
+                    break;
                 }
             }
+
+            //Aumenta a quantidade de dados lidos
+            qtdDados++;
+            //Atualiza o OffsetAtual
+            OffsetAtual += registroAtual->tamanhoRegistro + 5;
             // Libera memória
             free(registroAtual->nomePessoa);
             free(registroAtual->nomeUsuario);

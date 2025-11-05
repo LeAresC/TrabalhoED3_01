@@ -6,64 +6,76 @@
 #include "utilidades.h"
 #define MAXIMO 2000
 
+// Função que insere os dados lidos em um registro e o retorna
+RegistroPessoa *preparaRegistro(char *nomePessoa, char *nomeUsuario, char *valorId, char *idadePessoa)
+{
+    RegistroPessoa *novoDado = (RegistroPessoa *)malloc(sizeof(RegistroPessoa));
+    novoDado->removido = '0';
+    novoDado->nomePessoa = (char *)malloc(sizeof(char)*MAXIMO);
+    novoDado->nomeUsuario = (char *)malloc(sizeof(char)*MAXIMO);
+    strcpy(novoDado->nomePessoa,nomePessoa);
+    strcpy(novoDado->nomeUsuario,nomeUsuario);
+    novoDado->tamanhoNomePessoa = strlen(novoDado->nomePessoa);
+    novoDado->tamanhoNomeUsuario = strlen(novoDado->nomeUsuario);
+
+    novoDado->idPessoa = atoi(valorId);
+    if (strcmp(idadePessoa, "NULO") != 0)
+        novoDado->idadePessoa = atoi(idadePessoa);
+    else
+        novoDado->idadePessoa = -1;
+
+    novoDado->tamanhoRegistro = 16 + novoDado->tamanhoNomePessoa + novoDado->tamanhoNomeUsuario;
+    return novoDado;
+}
+
 int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
 {
     FILE *arqD = fopen(arquivoDados, "r+b");
-    FILE *arqI = fopen(arquivoIndice, "r+b");
+    FILE *arqI = fopen(arquivoIndice, "rb");
     if (arqD == NULL || arqI == NULL)
     {
         return 0;
     }
-    CabecalhoPessoa *Cabecalho = leCabecalhoPessoa(arqD);
+    CabecalhoPessoa *CabecalhoP = leCabecalhoPessoa(arqD);
 
-    RegistroIndice **DadosIndice = leArquivoIndice(arqI, Cabecalho->quantidadePessoas);
-    fseek(arqD, Cabecalho->proxByteOffset, SEEK_SET);
+    RegistroIndice **DadosIndice = leArquivoIndice(arqI, CabecalhoP->quantidadePessoas);
 
     for (int i = 0; i < N; i++)
     {
 
         int cnt;
-
-        RegistroPessoa *novoDado = (RegistroPessoa *)malloc(sizeof(RegistroPessoa));
-        novoDado->nomePessoa = malloc(sizeof(char) * MAXIMO);
-        novoDado->nomeUsuario = malloc(sizeof(char) * MAXIMO);
-
-        novoDado->removido = '0';
-
-        char buffer1[MAXIMO];
-        char buffer2[MAXIMO];
-
-        scanf("%d %999[^,],", &cnt, buffer1);
-        scanQuoteString(novoDado->nomePessoa);
+        char nomePessoa[MAXIMO];
+        char nomeUsuario[MAXIMO];
+        char valorId[MAXIMO];
+        char idadePessoa[MAXIMO];
         char aux;
-        scanf("%c %999[^,],", &aux, buffer2);
-        scanQuoteString(novoDado->nomeUsuario);
+        scanf("%d %999[^,],", &cnt, valorId);
+        scanQuoteString(nomePessoa);
+        scanf("%c %999[^,],", &aux, idadePessoa);
+        scanQuoteString(nomeUsuario);
 
-        novoDado->tamanhoNomePessoa = strlen(novoDado->nomePessoa);
-        novoDado->tamanhoNomeUsuario = strlen(novoDado->nomeUsuario);
+        RegistroPessoa *novoDado = preparaRegistro(nomePessoa, nomeUsuario, valorId, idadePessoa);
 
-        novoDado->idPessoa = atoi(buffer1);
-        if (strcmp(buffer2, "NULO") != 0)
-            novoDado->idadePessoa = atoi(buffer2);
-        else
-            novoDado->idadePessoa = -1;
+        inserePessoa(arqD,CabecalhoP->proxByteOffset,novoDado);
+        DadosIndice[CabecalhoP->quantidadePessoas] = malloc(sizeof(RegistroIndice));
+        insereFinalIndice(DadosIndice, CabecalhoP->quantidadePessoas, novoDado->idPessoa, CabecalhoP->proxByteOffset);
 
-        novoDado->tamanhoRegistro = 16 + novoDado->tamanhoNomePessoa + novoDado->tamanhoNomeUsuario;
-        long offset = ftell(arqD);
+        CabecalhoP->quantidadePessoas++;
+        CabecalhoP->proxByteOffset += novoDado->tamanhoRegistro + 5;
 
-        insereFinalPessoa(arqD, novoDado, offset);
-        DadosIndice[Cabecalho->quantidadePessoas] = malloc(sizeof(RegistroIndice));
-        insereFinalIndice(DadosIndice, Cabecalho->quantidadePessoas, novoDado->idPessoa, offset);
-
-        Cabecalho->quantidadePessoas++;
-        Cabecalho->proxByteOffset = ftell(arqD);
+        free(novoDado->nomePessoa);
+        free(novoDado->nomeUsuario);
         free(novoDado);
+        atualizaCabecalhoPessoa(arqD, CabecalhoP);
     }
-    atualizaCabecalhoPessoa(arqD, Cabecalho);
     fclose(arqI);
-    escreveIndice(arquivoIndice, DadosIndice, Cabecalho->quantidadePessoas);
-    free(Cabecalho);
+    escreveIndice(arquivoIndice, DadosIndice, CabecalhoP->quantidadePessoas);
+    for(int i = 0; i < CabecalhoP->quantidadePessoas; i++)
+    {
+        free(DadosIndice[i]);
+    }
     free(DadosIndice);
+    free(CabecalhoP);
     fclose(arqD);
     return 1;
 }

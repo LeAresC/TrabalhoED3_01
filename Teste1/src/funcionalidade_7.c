@@ -10,7 +10,7 @@
 int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
 {
     FILE *arqD = fopen(arquivoDados, "r+b");
-    FILE *arqI = fopen(arquivoIndice, "r+b");
+    FILE *arqI = fopen(arquivoIndice, "rb");
     if (arqD == NULL || arqI == NULL)
     {
         return 0;
@@ -22,7 +22,8 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
     int tamanhoIndice = CabecalhoP->quantidadePessoas;
     for (int i = 0; i < N; i++)
     {
-        int cnt;   scanf("%d", &cnt);
+        int cnt;
+        scanf("%d", &cnt);
         char nomeCampo1[MAXIMO];
         char valorCampo1[MAXIMO];
         char nomeCampo2[MAXIMO];
@@ -31,71 +32,63 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
         leInput(nomeCampo1, valorCampo1);
         leInput(nomeCampo2, valorCampo2);
         long *Offsets = buscaDados(arqD, DadosIndice, nomeCampo1, valorCampo1);
-
+        // (0 == idPessoa, 1 = idadePessoa, 2 = nomePessoa, 3 = nomeUsuario)
+        int campoBusca = determinarCampoBusca(nomeCampo2);
         for (int j = 0; j < MAXIMO; j++)
         {
             if (Offsets[j] == -1)
                 break;
+
             fseek(arqD, Offsets[j], SEEK_SET);
             RegistroPessoa *RegistroAtual = leRegistroPessoa(arqD);
-            if (strcmp(nomeCampo2, "idPessoa") == 0)
+
+            // Variáveis auxiliares
+            int idAnterior = RegistroAtual->idPessoa;
+            int OffsetdeAtualização = Offsets[j];
+            int tamanhoAnterior = RegistroAtual->tamanhoRegistro;
+            int tamanhoNec = RegistroAtual->tamanhoRegistro;
+
+            // Atualiza o registroAtual conforme o filtro para ser reinserido
+            if (campoBusca == 0)
             {
-                int idAnterior = RegistroAtual->idPessoa;
                 RegistroAtual->idPessoa = atoi(valorCampo2);
-                insereMeioPessoa(arqD, Offsets[j], RegistroAtual);
-                atualizaNoIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa, Offsets[j], idAnterior);
             }
-            else if (strcmp(nomeCampo2, "idadePessoa") == 0)
+            else if (campoBusca == 1)
             {
-                RegistroAtual->idadePessoa = atoi(valorCampo2);
-                insereMeioPessoa(arqD, Offsets[j], RegistroAtual);
+                // Verifica se o campo é nulo
+                if (strlen(valorCampo2) != 0)
+                    RegistroAtual->idadePessoa = atoi(valorCampo2);
+                else
+                    RegistroAtual->idadePessoa = -1;
             }
-            else if (strcmp(nomeCampo2, "nomePessoa") == 0)
+            else if (campoBusca == 2)
             {
                 strcpy(RegistroAtual->nomePessoa, valorCampo2);
                 RegistroAtual->tamanhoNomePessoa = strlen(valorCampo2);
-
-                int tamanhoNec = 16 + RegistroAtual->tamanhoNomePessoa + RegistroAtual->tamanhoNomeUsuario;
-
-                if (tamanhoNec > RegistroAtual->tamanhoRegistro)
-                {
-
-                    removeRegistroOffsetPessoa(arqD, Offsets[j], RegistroAtual);
-                    RegistroAtual->tamanhoRegistro = tamanhoNec;
-                    insereFinalPessoa(arqD, RegistroAtual, CabecalhoP->proxByteOffset);
-                    atualizaNoIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa, CabecalhoP->proxByteOffset, RegistroAtual->idPessoa);
-
-                    CabecalhoP->quantidadeRemovidos++;
-                    CabecalhoP->proxByteOffset = ftell(arqD);
-                }
-                else
-                {
-                    insereMeioPessoa(arqD, Offsets[j], RegistroAtual);
-                }
+                // Tamanho Necessário para o novo registro
+                tamanhoNec = 16 + RegistroAtual->tamanhoNomePessoa + RegistroAtual->tamanhoNomeUsuario;
             }
-            else if (strcmp(nomeCampo2, "nomeUsuario") == 0)
+            else if (campoBusca == 3)
             {
                 strcpy(RegistroAtual->nomeUsuario, valorCampo2);
                 RegistroAtual->tamanhoNomeUsuario = strlen(valorCampo2);
-
-                int tamanhoNec = 16 + RegistroAtual->tamanhoNomePessoa + RegistroAtual->tamanhoNomeUsuario;
-
-                if (tamanhoNec > RegistroAtual->tamanhoRegistro)
-                {
-                    removeRegistroOffsetPessoa(arqD, Offsets[j], RegistroAtual);
-                    RegistroAtual->tamanhoRegistro = tamanhoNec;
-                    insereFinalPessoa(arqD, RegistroAtual, CabecalhoP->proxByteOffset);
-                    atualizaNoIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa, CabecalhoP->proxByteOffset, RegistroAtual->idPessoa);
-
-                    CabecalhoP->quantidadeRemovidos++;
-                    CabecalhoP->proxByteOffset = ftell(arqD);
-                }
-                else
-                {
-                    insereMeioPessoa(arqD, Offsets[j], RegistroAtual);
-                }
+                tamanhoNec = 16 + RegistroAtual->tamanhoNomePessoa + RegistroAtual->tamanhoNomeUsuario;
             }
+            // Verifica se o novo registro cabe no lugar do registro anterior, se não, o remove e faz atualizações
+            if (tamanhoNec > tamanhoAnterior)
+            {
+                removeRegistroOffsetPessoa(arqD, Offsets[j]);
+                RegistroAtual->tamanhoRegistro = tamanhoNec;
+                OffsetdeAtualização = CabecalhoP->proxByteOffset;
+                CabecalhoP->quantidadeRemovidos++;
+                CabecalhoP->proxByteOffset += 5 + RegistroAtual->tamanhoRegistro;
+            }
+            // Atualiza o arquivo pessoa
+            inserePessoa(arqD, OffsetdeAtualização, RegistroAtual);
+            // Atualiza o indice em RAM mantendo a ordenação
+            atualizaNoIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa, OffsetdeAtualização, idAnterior);
 
+            // Libera a memória
             free(RegistroAtual->nomePessoa);
             free(RegistroAtual->nomeUsuario);
             free(RegistroAtual);
@@ -104,6 +97,10 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
     }
     fclose(arqI);
     escreveIndice(arquivoIndice, DadosIndice, CabecalhoP->quantidadePessoas);
+    for (int i = 0; i < CabecalhoP->quantidadePessoas; i++)
+    {
+        free(DadosIndice[i]);
+    }
     free(DadosIndice);
     free(CabecalhoP);
     fclose(arqD);
