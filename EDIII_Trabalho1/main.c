@@ -1,3 +1,5 @@
+//Autores : Luis Eduardo Aires Coimbra, Número USP: 15472565; Pedro Teodoro do Nascimento, Número USP: 15579459
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -34,15 +36,15 @@ int main () {
 
     if (funcionalidade == 2) {
         // Ler os nomes dos arquivos e chamar a função criarTabela
-        char nome_csv[MAXIMO], nome_dados[MAXIMO], nome_indice[MAXIMO];
-        scanf("%s %s %s", nome_csv, nome_dados, nome_indice);
+        char nomeCsv[MAXIMO], nomeDados[MAXIMO], nomeIndice[MAXIMO];
+        scanf("%s %s %s", nomeCsv, nomeDados, nomeIndice);
         // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
         // Retorna 1 se tudo der certo, 0 caso contrário
-        resultado = criarTabela(nome_csv, nome_dados, nome_indice);
+        resultado = criarTabela(nomeCsv, nomeDados, nomeIndice);
         if (resultado == 1) {
             // Imprime os arquivos binários na tela
-            binarioNaTela(nome_dados);
-            binarioNaTela(nome_indice);
+            binarioNaTela(nomeDados);
+            binarioNaTela(nomeIndice);
         } else {
             // Falha na criação da tabela, imprime como definido
             erroAbertura();
@@ -78,7 +80,7 @@ int main () {
         scanf("%s", arquivoIndice);
         scanf("%d", &qtd);
 
-        // Retorna 1 se tudo certo e 0 se houver 
+        // Retorna 1 se tudo certo e 0 se houver erro na abertura
         resultado = buscaEmArquivo(arquivoDados, arquivoIndice, qtd);
     
         if(resultado == 0)

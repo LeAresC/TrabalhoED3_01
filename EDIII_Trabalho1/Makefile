@@ -33,4 +33,3 @@ run: all
 # Limpa artefatos de build
 clean:
 	rm -f $(OBJS) $(TARGET) $(BINS)
-
