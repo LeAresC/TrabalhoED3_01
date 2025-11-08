@@ -142,9 +142,9 @@ int criarTabelaSegue(const char *nomeArquivoCsv, const char *nomeArquivoDados) {
         // Pegar o byte offset atual antes de escrever o registro
         byteOffsetAtual = dataHeader.proxRRN;
 
-        // Escrever o registro no arquivo de dados no offset correto
-        // Usa fseek para garantir que está escrevendo no lugar certo
-        fseek(arquivoDados, byteOffsetAtual, SEEK_SET);
+        // fseek removido, pois a escrita é sequencial no arquivo de dados
+        // Assume que não terá problema no ponteiro do arquivo
+        // fseek(arquivoDados, byteOffsetAtual, SEEK_SET);
 
         // Escreve cada campo do registro separadamente para evitar problemas de padding
         fwrite(&registro->removido, sizeof(registro->removido), 1, arquivoDados);
