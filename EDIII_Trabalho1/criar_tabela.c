@@ -50,7 +50,7 @@ int criarTabela(const char *nomeArquivoCsv, const char *nomeArquivoDados, const 
     dataHeader.quantidadePessoas = 0;
     dataHeader.quantidadeRemovidos = 0;
     dataHeader.proxByteOffset = 17;
-    escreveCabecalhoPessoa(arquivoDados, '0', 0, 0, 17);
+    escreveCabecalhoPessoa(arquivoDados, '0', dataHeader.quantidadePessoas, dataHeader.quantidadeRemovidos, dataHeader.proxByteOffset);
 
     // Cabeçalho do índice
     escreveCabecalhoIndice(arquivoIndice, '0');
@@ -64,8 +64,6 @@ int criarTabela(const char *nomeArquivoCsv, const char *nomeArquivoDados, const 
     capacidadeIndice = 0;
     registro = NULL;
     
-
-
     // Cada iteração já lê e processa um registro do CSV
     while ((registro = leRegistroPessoaCsv(arquivoCsv)) != NULL) {
         // Pegar o byte offset atual antes de escrever o registro

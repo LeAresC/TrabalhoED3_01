@@ -18,6 +18,7 @@ typedef struct {
     char *nomePessoa; // variável
     char *nomeUsuario; // variável
 } RegistroPessoa;
+
 typedef struct {
     char status; // 1 byte: '0' inconsistente, '1' consistente
     char lixo[11]; // 11 bytes de lixo preenchidos com '$'

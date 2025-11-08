@@ -39,8 +39,6 @@ int criarTabelaSegue(const char *nomeArquivoCsv, const char *nomeArquivoDados) {
     // Inicializa registro
     registro = NULL;
     
-    
-
     // Cada iteração já lê e processa um registro do CSV
     while ((registro = leRegistroSegueCsv(arquivoCsv)) != NULL) {
         // Escreve o registro de forma sequencial
