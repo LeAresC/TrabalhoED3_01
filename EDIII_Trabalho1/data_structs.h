@@ -28,6 +28,21 @@ typedef struct {
     long byteOffset; // 8 bytes
 } RegistroIndice;
 
+typedef struct {
+    char status; // 1 byte: '0' inconsistente, '1' consistente
+    int quantidadePessoas; // 4 bytes
+    int proxRRN; // 4 bytes
+} CabecalhoSegue;
+
+typedef struct {
+    char removido; // 1 byte: '0' ativo, '1' removido
+    int idPessoaQueSegue; // 4 bytes
+    int idPessoaQueESeguida; // 4 bytes
+    char dataInicioQueSegue[10]; // 10 bytes (formato "DD/MM/AAAA")
+    char dataFimQueSegue[10]; // 10 bytes (formato "DD/MM/AAAA")
+    char grauAmizade; // 1 byte ('0' a '2')
+} RegistroSegue;
+
 #endif // DATA_STRUCTS_H
 
 
