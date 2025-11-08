@@ -4,9 +4,11 @@
 #include "data_structs.h"
 #include "ordena_segue.h"
 #include "utils.h"
+#include "io_registro.h"
+#include "escreve_cabecalho.h"
 #define MAXIMO 500
 
-static compararNulos(int a_null, int b_null) {
+static int compararNulos(int a_null, int b_null) {
     if (a_null && !b_null) return 1; // a é nulo, b não é nulo
     if (!a_null && b_null) return -1; // a não é nulo, b é nulo
     return 0; // ambos são nulos ou ambos não são nulos
@@ -72,26 +74,16 @@ int ordenaSegue(const char *nomeArquivoDesordenado, const char *nomeArquivoOrden
     }
 
     // Ler o cabeçalho do arquivo desordenado
-    fread(&dataHeader.status, sizeof(dataHeader.status), 1, arquivoDesordenado);
-    fread(&dataHeader.quantidadePessoas, sizeof(dataHeader.quantidadePessoas), 1, arquivoDesordenado);
-    fread(&dataHeader.proxRRN, sizeof(dataHeader.proxRRN), 1, arquivoDesordenado);
+    dataHeader = leCabecalhoSegue(arquivoDesordenado);
 
     // Escrever o cabeçalho no arquivo ordenado
-    dataHeader.status = '0';
-    fwrite(&dataHeader.status, sizeof(dataHeader.status), 1, arquivoOrdenado);
-    fwrite(&dataHeader.quantidadePessoas, sizeof(dataHeader.quantidadePessoas), 1, arquivoOrdenado);
-    fwrite(&dataHeader.proxRRN, sizeof(dataHeader.proxRRN), 1, arquivoOrdenado);
+    escreveCabecalhoSegue(arquivoOrdenado, '0', dataHeader.quantidadePessoas, dataHeader.proxRRN);
 
     registro = (RegistroSegue*) malloc(sizeof(RegistroSegue) * dataHeader.quantidadePessoas);
 
     for (int i = 0; i < dataHeader.quantidadePessoas; i++) {
         // Lê cada registro do arquivo desordenado
-        fread(&registro[i].removido, sizeof(registro[i].removido), 1, arquivoDesordenado);
-        fread(&registro[i].idPessoaQueSegue, sizeof(registro[i].idPessoaQueSegue), 1, arquivoDesordenado);
-        fread(&registro[i].idPessoaQueESeguida, sizeof(registro[i].idPessoaQueESeguida), 1, arquivoDesordenado);
-        fread(&registro[i].dataInicioQueSegue, sizeof(registro[i].dataInicioQueSegue), 1, arquivoDesordenado);
-        fread(&registro[i].dataFimQueSegue, sizeof(registro[i].dataFimQueSegue), 1, arquivoDesordenado);
-        fread(&registro[i].grauAmizade, sizeof(registro[i].grauAmizade), 1, arquivoDesordenado);
+        leRegistroSegue(arquivoDesordenado, &registro[i]);
     }
     
     // Fechar o arquivo desordenado
@@ -102,22 +94,15 @@ int ordenaSegue(const char *nomeArquivoDesordenado, const char *nomeArquivoOrden
 
     // Reescrever o cabeçalho no arquivo ordenado
     fseek(arquivoOrdenado, 0, SEEK_SET);
-    dataHeader.status = '1';
-    fwrite(&dataHeader.status, sizeof(dataHeader.status), 1, arquivoOrdenado);
-    fwrite(&dataHeader.quantidadePessoas, sizeof(dataHeader.quantidadePessoas), 1, arquivoOrdenado);
-    fwrite(&dataHeader.proxRRN, sizeof(dataHeader.proxRRN), 1, arquivoOrdenado);
+    escreveCabecalhoSegue(arquivoOrdenado, '1', dataHeader.quantidadePessoas, dataHeader.proxRRN);
 
     for (int i = 0; i < dataHeader.quantidadePessoas; i++) {
-        // Escrever cada registro ordenado no arquivo ordenado
-        fwrite(&registro[i].removido, sizeof(registro[i].removido), 1, arquivoOrdenado);
-        fwrite(&registro[i].idPessoaQueSegue, sizeof(registro[i].idPessoaQueSegue), 1, arquivoOrdenado);
-        fwrite(&registro[i].idPessoaQueESeguida, sizeof(registro[i].idPessoaQueESeguida), 1, arquivoOrdenado);
-        fwrite(&registro[i].dataInicioQueSegue, sizeof(registro[i].dataInicioQueSegue), 1, arquivoOrdenado);
-        fwrite(&registro[i].dataFimQueSegue, sizeof(registro[i].dataFimQueSegue), 1, arquivoOrdenado);
-        fwrite(&registro[i].grauAmizade, sizeof(registro[i].grauAmizade), 1, arquivoOrdenado);
+        // Escreve cada registro ordenado no arquivo ordenado
+        escreveRegistroSegue(arquivoOrdenado, &registro[i]);
     }
 
     // Fechar o arquivo ordenado
     fclose(arquivoOrdenado);
     free(registro);
+    return 1;
 }
