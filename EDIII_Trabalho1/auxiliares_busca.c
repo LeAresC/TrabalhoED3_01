@@ -95,89 +95,64 @@ void leCriterioBusca(char *nomeCampo, char *valorCampo) {
     }
 }
 
-RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices,
-                              char *nomeCampo, char *valorCampo, int *counter) {    
+RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices, char *nomeCampo, char *valorCampo, int *counter) {    
+    // Declara variáveis
     RegistroPessoa** lista;
     RegistroPessoa* registro;
-    int capacidade;
-    char removido;
-    int tamanhoRegistro;
-    int match;
+    int capacidade, match, valorId;
     long byteOffset;
-    int valorId;
     RegistroIndice chaveBusca;
 
+    // Inicializa o contador de registros encontrados
     *counter = 0;
     lista = NULL;
 
+    // Se a busca for por idPessoa, usa busca binária no índice
     if (strcmp(nomeCampo, "idPessoa") == 0) {
         
+        // Constrói a chave de busca
         valorId = atoi(valorCampo);
         chaveBusca.idPessoa = valorId;
 
-        RegistroIndice *resultado = (RegistroIndice*) bsearch(&chaveBusca, registroIndice, quantidadeIndices, 
-                                                            sizeof(RegistroIndice), compararRegistrosIndice);
+        // Realiza a busca binária no índice
+        RegistroIndice *resultado = (RegistroIndice*) bsearch(&chaveBusca, registroIndice, quantidadeIndices, sizeof(RegistroIndice), compararRegistrosIndice);
 
+        // Se não encontrar, retorna NULL
         if (resultado == NULL) {
             return NULL; 
         }
 
+        // Se encontrar, lê o registro correspondente no arquivo de pessoas
         byteOffset = resultado->byteOffset;
-        
         fseek(arquivoPessoa, byteOffset, SEEK_SET);
         registro = leRegistroPessoa(arquivoPessoa); 
 
+        // Se o registro for nulo ou removido, libera e retorna NULL
         if (registro == NULL || registro->removido == '1') {
             if (registro) liberaRegistroPessoa(registro);
             return NULL;
         }
 
+        // Caso contrário, adiciona o registro à lista e retorna
         lista = (RegistroPessoa**) malloc(sizeof(RegistroPessoa*));
         lista[0] = registro;
         *counter = 1;
         return lista;
 
     } else {
-        
+        // Busca sequencial para os outros campos
         fseek(arquivoPessoa, 17, SEEK_SET);
         capacidade = 0;
 
-        while (fread(&removido, sizeof(char), 1, arquivoPessoa) == 1) {
-            
-            fread(&tamanhoRegistro, sizeof(int), 1, arquivoPessoa);
-
-            if (removido == '1') {
-                fseek(arquivoPessoa, tamanhoRegistro, SEEK_CUR);
+        // Percorre todo o arquivo de pessoas
+        while ((registro = leRegistroPessoa(arquivoPessoa)) != NULL) {
+            // Se estiver removido, libera e continua
+            if (registro->removido == '1') {
+                liberaRegistroPessoa(registro);
                 continue;
             }
-            
-            registro = (RegistroPessoa*) malloc(sizeof(RegistroPessoa));
-            registro->removido = removido;
-            registro->tamanhoRegistro = tamanhoRegistro;
 
-            fread(&registro->idPessoa, sizeof(int), 1, arquivoPessoa);
-            fread(&registro->idadePessoa, sizeof(int), 1, arquivoPessoa);
-            fread(&registro->tamanhoNomePessoa, sizeof(int), 1, arquivoPessoa);
-
-            if (registro->tamanhoNomePessoa > 0) {
-                registro->nomePessoa = (char*) malloc(registro->tamanhoNomePessoa + 1);
-                fread(registro->nomePessoa, registro->tamanhoNomePessoa, 1, arquivoPessoa);
-                registro->nomePessoa[registro->tamanhoNomePessoa] = '\0';
-            } else {
-                registro->nomePessoa = (char*) malloc(1);
-                registro->nomePessoa[0] = '\0';
-            }
-
-            fread(&registro->tamanhoNomeUsuario, sizeof(int), 1, arquivoPessoa);
-            if (registro->tamanhoNomeUsuario > 0) {
-                registro->nomeUsuario = (char*) malloc(registro->tamanhoNomeUsuario + 1);
-                fread(registro->nomeUsuario, registro->tamanhoNomeUsuario, 1, arquivoPessoa);
-                registro->nomeUsuario[registro->tamanhoNomeUsuario] = '\0';
-            } else {
-                registro->nomeUsuario = (char*) malloc(1);
-                registro->nomeUsuario[0] = '\0';
-            }
-
+            // Verifica se o registro atual corresponde ao critério de busca
             match = 0;
             if (strcmp(nomeCampo, "idadePessoa") == 0) {
                 if (registro->idadePessoa == atoi(valorCampo)) match = 1;
@@ -187,17 +162,23 @@ RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndic
                 if (registro->tamanhoNomeUsuario > 0 && strcmp(registro->nomeUsuario, valorCampo) == 0) match = 1;
             }
 
+            // Se o registro bate com o critério, adiciona à lista
             if (match) {
+                // Verifica se precisa aumentar a capacidade da lista
                 if (*counter == capacidade) {
+                    // Se capacidade for 0, inicializa com 8, senão dobra
                     capacidade = (capacidade == 0) ? 8 : capacidade * 2;
                     lista = (RegistroPessoa**) realloc(lista, capacidade * sizeof(RegistroPessoa*));
                 }
+                // Adiciona o registro à lista e incrementa o contador
                 lista[*counter] = registro;
                 (*counter)++;
             } else {
+                // Se não bate, libera o registro
                 liberaRegistroPessoa(registro);
             }
         }
+        // Retorna a lista de registros encontrados
         return lista;
     }
 }
