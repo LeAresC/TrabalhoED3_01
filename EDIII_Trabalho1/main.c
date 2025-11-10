@@ -5,6 +5,9 @@
 #include <string.h>
 #include "criar_indice.h"
 #include "criar_tabela.h"
+#include "criar_tabela_segue.h"
+#include "ordena_segue.h"
+#include "junta_pessoa_segue.h"
 #include "auxiliares_busca.h"
 #define MAXIMO 500
 
@@ -87,5 +90,54 @@ int main () {
         {
             erroAbertura();
         }
+    }
+
+    if (funcionalidade == 8) {
+        // Ler os nomes dos arquivos e chamar a função criarTabela
+        char nomeCsv[MAXIMO], nomeDados[MAXIMO];
+        scanf("%s %s", nomeCsv, nomeDados);
+        // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
+        // Retorna 1 se tudo der certo, 0 caso contrário
+        resultado = criarTabelaSegue(nomeCsv, nomeDados);
+        if (resultado == 1) {
+            // Imprime os arquivos binários na tela
+            binarioNaTela(nomeDados);
+        } else {
+            // Falha na criação da tabela, imprime como definido
+            erroAbertura();
+        }
+
+    }
+        
+    if (funcionalidade == 9) {
+        // Ler os nomes dos arquivos e chamar a função criarTabela
+        char desordenado[MAXIMO], ordenado[MAXIMO];
+        scanf("%s %s", desordenado, ordenado);
+        // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
+        // Retorna 1 se tudo der certo, 0 caso contrário
+        resultado = ordenaSegue(desordenado, ordenado);
+        if (resultado == 1) {
+            // Imprime os arquivos binários na tela
+            binarioNaTela(ordenado);
+        } else {
+            // Falha na criação da tabela, imprime como definido
+            erroAbertura();
+        }
+
+    }
+    
+    if (funcionalidade == 10) {
+        // Ler os nomes dos arquivos e chamar a função criarTabela
+        char ordenado[MAXIMO], pessoa[MAXIMO], indice[MAXIMO];
+        int quantidade;
+        scanf("%s %s %s %d", pessoa, ordenado, indice, &quantidade);
+        // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
+        // Retorna 1 se tudo der certo, 0 caso contrário
+        resultado = juntaPessoaSegue(pessoa, ordenado, indice, quantidade);
+        if (resultado == 0) {
+            // Falha na criação da tabela, imprime como definido
+            erroAbertura();
+        }
+
     }
 }
