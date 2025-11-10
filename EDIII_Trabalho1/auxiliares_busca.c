@@ -7,62 +7,6 @@
 #include "utils.h"
 #define MAXIMO 500
 
-RegistroPessoa *leRegistro(FILE *arq)
-{
-    // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
-    RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(sizeof(RegistroPessoa));
-    fread(&registroAtual->removido, sizeof(char), 1, arq);
-    fread(&registroAtual->tamanhoRegistro, sizeof(int), 1, arq);
-
-    // So o registro atual foi removido retorna o registroAtual como está
-    if (registroAtual->removido == '1')
-    {
-        return registroAtual;
-    }
-
-    // Lê id idade e tamanhoNome
-    fread(&registroAtual->idPessoa, sizeof(int), 1, arq);
-    fread(&registroAtual->idadePessoa, sizeof(int), 1, arq);
-    fread(&registroAtual->tamanhoNomePessoa, sizeof(int), 1, arq);
-
-    // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
-    registroAtual->nomePessoa = malloc(sizeof(char) * (registroAtual->tamanhoNomePessoa + 1));
-
-
-    // Se não houver nome copia "-" para o registroAtual
-    if (registroAtual->tamanhoNomePessoa == 0)
-    {
-        strcpy(registroAtual->nomePessoa, "-");
-        registroAtual->nomePessoa[1] = '\0';
-    }
-
-    //Do contrário copia o nome do arquivo para o registroAtual
-    else
-    {
-        fread(registroAtual->nomePessoa, sizeof(char), registroAtual->tamanhoNomePessoa, arq);
-        registroAtual->nomePessoa[registroAtual->tamanhoNomePessoa] = '\0';
-    }
-    fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
-    
-    // Aloca espaço para o nomeusuario = tamanhoNomeUsuario + (1byte) do \0
-    registroAtual->nomeUsuario = malloc(sizeof(char) * (registroAtual->tamanhoNomeUsuario + 1));
-
-     // Se não houver usuario copia "-" para o registroAtual
-    if (registroAtual->tamanhoNomeUsuario == 0)
-    {
-        strcpy(registroAtual->nomeUsuario, "-");
-        registroAtual->nomeUsuario[1] = '\0';
-    }
-    //Do contrário copia o nome de usuario do arquivo para o registroAtual
-    else
-    {
-        fread(registroAtual->nomeUsuario, sizeof(char), registroAtual->tamanhoNomeUsuario, arq);
-        registroAtual->nomeUsuario[registroAtual->tamanhoNomeUsuario] = '\0';
-    }
-    // Retorna o registro atual
-    return registroAtual;
-}
-
 void imprimirSaida(RegistroPessoa *registroAtual)
 {
     // Imprime o registroAtual segundo as especificações do trabalho
@@ -86,17 +30,6 @@ void erroRegistro()
 {
     //Imprime o erro de registro
     printf("Registro inexistente.\n");
-}
-
-CabecalhoPessoa* leCabecalho(FILE *arq)
-{
-    // Le o cabeçalho do arquivo de dados
-    CabecalhoPessoa *cabecalho  = (CabecalhoPessoa*)malloc(sizeof(CabecalhoPessoa));
-    fread(&cabecalho->status, sizeof(char), 1 , arq);
-    fread(&cabecalho->quantidadePessoas, sizeof(int), 1 ,arq);
-    fread(&cabecalho->quantidadeRemovidos, sizeof(int), 1, arq);
-    fread(&cabecalho->proxByteOffset, sizeof(long long int), 1, arq);
-    return cabecalho;
 }
 
 void scanQuoteString(char *str)
@@ -163,8 +96,7 @@ void leCriterioBusca(char *nomeCampo, char *valorCampo) {
 }
 
 RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices,
-                              CabecalhoPessoa *cabecalhoPessoa, char *nomeCampo, char *valorCampo, int *counter) {
-    
+                              char *nomeCampo, char *valorCampo, int *counter) {    
     RegistroPessoa** lista;
     RegistroPessoa* registro;
     int capacidade;

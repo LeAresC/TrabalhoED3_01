@@ -124,10 +124,12 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
-        memset(registro->dataInicioQueSegue, '$', sizeof(registro->dataInicioQueSegue));
+        memset(registro->dataInicioQueSegue, '$', 10);
+        registro->dataInicioQueSegue[10] = '\0';
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
-        strcpy(registro->dataInicioQueSegue, campo);
+        strncpy(registro->dataInicioQueSegue, campo, 10);
+        registro->dataInicioQueSegue[10] = '\0';
     }
     free(campo);
 
@@ -135,10 +137,12 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
-        memset(registro->dataFimQueSegue, '$', sizeof(registro->dataFimQueSegue));
+        memset(registro->dataFimQueSegue, '$', 10);
+        registro->dataFimQueSegue[10] = '\0';
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
-        strcpy(registro->dataFimQueSegue, campo);
+        strncpy(registro->dataFimQueSegue, campo, 10);
+        registro->dataFimQueSegue[10] = '\0';
     }
     free(campo);
 

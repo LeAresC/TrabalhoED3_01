@@ -35,7 +35,7 @@ static RegistroSegue* buscarRegistrosSegue(RegistroSegue *registroSegue, int idC
 
     chaveBusca.idPessoaQueSegue = idChave;
     primeiroMatch = (RegistroSegue*) bsearch(&chaveBusca, registroSegue, totalRegistros, 
-                                            sizeof(RegistroSegue), comparadorRegistroSegue);
+                                            sizeof(RegistroSegue), compararRegistroSegue);
 
     if (primeiroMatch == NULL) {
         return NULL;
@@ -184,8 +184,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
 
         matchCountPessoa = 0;
         matchesPessoa = buscaPessoas(arquivoPessoa, registroIndice, quantidadeIndices,
-                                     &cabecalhoPessoa, nomeCampo, valorCampo,
-                                     &matchCountPessoa);
+                                     nomeCampo, valorCampo, &matchCountPessoa);
         
         if (matchCountPessoa == 0) {
             erroRegistro();

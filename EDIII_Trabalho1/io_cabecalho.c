@@ -1,3 +1,6 @@
+#include "io_cabecalho.h"
+#include <string.h>
+
 void escreveCabecalhoIndice(FILE *arquivoIndice, char status) {
     // Cria o cabeçalho do arquivo de índice
     CabecalhoIndice dataHeader;
@@ -9,7 +12,7 @@ void escreveCabecalhoIndice(FILE *arquivoIndice, char status) {
     fwrite(dataHeader.lixo, sizeof(dataHeader.lixo), 1, arquivoIndice);
 }
 
-void escreveCabecalhoPessoa(FILE *arquivoPessoa, char status, int quantidadePessoas, int quantidadeRemovidos, long long int proxByteOffset) {
+void escreveCabecalhoPessoa(FILE *arquivoPessoa, char status, int quantidadePessoas, int quantidadeRemovidos, long proxByteOffset) {
     // Cria o cabeçalho do arquivo de pessoas
     CabecalhoPessoa dataHeader;
     dataHeader.status = status;
@@ -24,7 +27,7 @@ void escreveCabecalhoPessoa(FILE *arquivoPessoa, char status, int quantidadePess
     fwrite(&dataHeader.proxByteOffset, sizeof(dataHeader.proxByteOffset), 1, arquivoPessoa);
 }
 
-void escreveCabecalhoSegue(FILE *arquivoSegue, char status, int quantidadePessoas, long long int proxRRN) {
+void escreveCabecalhoSegue(FILE *arquivoSegue, char status, int quantidadePessoas, int proxRRN) {
     // Cria o cabeçalho do arquivo de segue
     CabecalhoSegue dataHeader;
     dataHeader.status = status;
@@ -40,18 +43,18 @@ void escreveCabecalhoSegue(FILE *arquivoSegue, char status, int quantidadePessoa
 CabecalhoSegue leCabecalhoSegue(FILE *arquivoSegue) {
     // Le o cabeçalho do arquivo de dados
     CabecalhoSegue cabecalho;
-    fread(&cabecalho.status, sizeof(char), 1 , arquivoSegue);
-    fread(&cabecalho.quantidadePessoas, sizeof(int), 1 ,arquivoSegue);
-    fread(&cabecalho.proxRRN, sizeof(long long int), 1, arquivoSegue);
+    fread(&cabecalho.status, sizeof(cabecalho.status), 1, arquivoSegue);
+    fread(&cabecalho.quantidadePessoas, sizeof(cabecalho.quantidadePessoas), 1, arquivoSegue);
+    fread(&cabecalho.proxRRN, sizeof(cabecalho.proxRRN), 1, arquivoSegue);
     return cabecalho;
 }
 
 CabecalhoPessoa leCabecalhoPessoa(FILE *arquivoPessoa) {
     // Le o cabeçalho do arquivo de dados
     CabecalhoPessoa cabecalho;
-    fread(&cabecalho.status, sizeof(char), 1 , arquivoPessoa);
-    fread(&cabecalho.quantidadePessoas, sizeof(int), 1 ,arquivoPessoa);
-    fread(&cabecalho.quantidadeRemovidos, sizeof(int), 1, arquivoPessoa);
-    fread(&cabecalho.proxByteOffset, sizeof(long long int), 1, arquivoPessoa);
+    fread(&cabecalho.status, sizeof(cabecalho.status), 1, arquivoPessoa);
+    fread(&cabecalho.quantidadePessoas, sizeof(cabecalho.quantidadePessoas), 1, arquivoPessoa);
+    fread(&cabecalho.quantidadeRemovidos, sizeof(cabecalho.quantidadeRemovidos), 1, arquivoPessoa);
+    fread(&cabecalho.proxByteOffset, sizeof(cabecalho.proxByteOffset), 1, arquivoPessoa);
     return cabecalho;
 }

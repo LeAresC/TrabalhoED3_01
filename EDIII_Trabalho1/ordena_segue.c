@@ -5,7 +5,7 @@
 #include "ordena_segue.h"
 #include "utils.h"
 #include "io_registro.h"
-#include "escreve_cabecalho.h"
+#include "io_cabecalho.h"
 #define MAXIMO 500
 
 static int compararNulos(int a_null, int b_null) {
@@ -40,7 +40,7 @@ static int compararRegistrosSegue(const void *a, const void *b) {
     // Cast dos ponteiros para o tipo correto
     const RegistroSegue *regA = (const RegistroSegue *)a;
     const RegistroSegue *regB = (const RegistroSegue *)b;
-    int a_null, b_null, resultado;
+    int resultado;
 
     // Comparar por idPessoaQueSegue primeiro
     resultado = comparaInt(regA->idPessoaQueSegue, regB->idPessoaQueSegue);
