@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "auxiliares_busca.h"
+#include "io_registro.h"
+#include "io_cabecalho.h"
+
 #define MAXIMO 500
 
 
@@ -16,21 +19,21 @@ int lerArquivoBinario(char *nomeDoArquivo)
     }
 
     // Lê o registro de cabeçalho
-    CabecalhoPessoa *cabecalho;
-    cabecalho = leCabecalho(arq);
+    CabecalhoPessoa cabecalho;
+    cabecalho = leCabecalhoPessoa(arq);
 
     //Se não houver registros retorna 1
-    if(cabecalho->proxByteOffset == 0)
+    if(cabecalho.proxByteOffset == 0)
     {
         return 1;
     }
 
     //Le todos os registros e imprime na saida
-    while (ftell(arq) < cabecalho->proxByteOffset)
+    while (ftell(arq) < cabecalho.proxByteOffset)
     {
         // Le o registro atual
         RegistroPessoa *registroAtual;
-        registroAtual = leRegistro(arq); 
+        registroAtual = leRegistroPessoa(arq); 
 
         // Se estiver removido pula para o proximo
         if (registroAtual->removido == '1')

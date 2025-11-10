@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "auxiliares_busca.h"
+#include "io_cabecalho.h"
+#include "io_registro.h"
 #define MAXIMO 500
 #define INF 1e8
 
@@ -55,8 +57,8 @@ int buscaEmArquivo(char *arquivoDados, char *arquivoIndice, int qtd)
     }
 
     // Le o cabecalho do arquivo de dados
-    CabecalhoPessoa *cabecalho;
-    cabecalho = leCabecalho(arqD);
+    CabecalhoPessoa cabecalho;
+    cabecalho = leCabecalhoPessoa(arqD);
 
     // Loop da funcionalidade que executa n = qtd de vezes
     while (qtd--)
@@ -99,7 +101,7 @@ int buscaEmArquivo(char *arquivoDados, char *arquivoIndice, int qtd)
             else
             {
                 fseek(arqD, RRN, SEEK_SET);
-                registroAtual = leRegistro(arqD);
+                registroAtual = leRegistroPessoa(arqD);
                 imprimirSaida(registroAtual);
             }
         }
@@ -111,10 +113,10 @@ int buscaEmArquivo(char *arquivoDados, char *arquivoIndice, int qtd)
             int registroEncontrado = 0;
 
             // Busca sequencial no arquivo de dados até o seu fim
-            while (cabecalho->proxByteOffset > ftell(arqD))
+            while (cabecalho.proxByteOffset > ftell(arqD))
             {
                 // Le o registro atual
-                registroAtual = leRegistro(arqD);
+                registroAtual = leRegistroPessoa(arqD);
 
                 //Se o registro atual estiver removido pula para o próximo
                 if (registroAtual->removido == '1')
