@@ -4,23 +4,10 @@
 #include "data_structs.h"
 #include "criar_tabela.h"
 #include "utils.h"
-#include "escreve_cabecalho.h"
+#include "io_cabecalho.h"
 #include "io_csv.h"
 #include "io_registro.h"
 #define MAXIMO 500
-
-
-// Função para comparar dois registros de índice pelo campo idPessoa
-static int compararRegistrosIndice(const void *a, const void *b) {
-    // Cast dos ponteiros para o tipo correto
-    const RegistroIndice *regA = (const RegistroIndice *)a;
-    const RegistroIndice *regB = (const RegistroIndice *)b;
-    
-    // Comparação simples dos campos idPessoa
-    if (regA->idPessoa < regB->idPessoa) return -1;
-    if (regA->idPessoa > regB->idPessoa) return 1;
-    return 0;
-}
 
 int criarTabela(const char *nomeArquivoCsv, const char *nomeArquivoDados, const char *nomeArquivoIndice) {
     // Declaração de variáveis

@@ -25,8 +25,8 @@ void escreveRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
     fwrite(&registro->removido, sizeof(registro->removido), 1, arquivo);
     fwrite(&registro->idPessoaQueSegue, sizeof(registro->idPessoaQueSegue), 1, arquivo);
     fwrite(&registro->idPessoaQueESeguida, sizeof(registro->idPessoaQueESeguida), 1, arquivo);
-    fwrite(&registro->dataInicioQueSegue, sizeof(registro->dataInicioQueSegue), 1, arquivo);
-    fwrite(&registro->dataFimQueSegue, sizeof(registro->dataFimQueSegue), 1, arquivo);
+    fwrite(registro->dataInicioQueSegue, 10, 1, arquivo);  // Escreve exatamente 10 bytes
+    fwrite(registro->dataFimQueSegue, 10, 1, arquivo);     // Escreve exatamente 10 bytes
     fwrite(&registro->grauAmizade, sizeof(registro->grauAmizade), 1, arquivo);
 }
 
@@ -60,39 +60,26 @@ RegistroPessoa *leRegistroPessoa(FILE *arq)
     fread(&registroAtual->idadePessoa, sizeof(int), 1, arq);
     fread(&registroAtual->tamanhoNomePessoa, sizeof(int), 1, arq);
 
-    // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
-    registroAtual->nomePessoa = malloc(sizeof(char) * (registroAtual->tamanhoNomePessoa + 1));
-
-
-    // Se não houver nome copia "-" para o registroAtual
-    if (registroAtual->tamanhoNomePessoa == 0)
-    {
-        strcpy(registroAtual->nomePessoa, "-");
-        registroAtual->nomePessoa[1] = '\0';
-    }
-
-    //Do contrário copia o nome do arquivo para o registroAtual
-    else
-    {
-        fread(registroAtual->nomePessoa, sizeof(char), registroAtual->tamanhoNomePessoa, arq);
+    if (registroAtual->tamanhoNomePessoa > 0) {
+        // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
+        registroAtual->nomePessoa = malloc((registroAtual->tamanhoNomePessoa + 1));
+        fread(registroAtual->nomePessoa, registroAtual->tamanhoNomePessoa, 1, arq);
         registroAtual->nomePessoa[registroAtual->tamanhoNomePessoa] = '\0';
+    } else {
+        // Aloca espaço mínimo para o nome
+        registroAtual->nomePessoa = malloc(1);
+        registroAtual->nomePessoa[0] = '\0';
     }
-    fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
-    
-    // Aloca espaço para o nomeusuario = tamanhoNomeUsuario + (1byte) do \0
-    registroAtual->nomeUsuario = malloc(sizeof(char) * (registroAtual->tamanhoNomeUsuario + 1));
 
-     // Se não houver usuario copia "-" para o registroAtual
-    if (registroAtual->tamanhoNomeUsuario == 0)
-    {
-        strcpy(registroAtual->nomeUsuario, "-");
-        registroAtual->nomeUsuario[1] = '\0';
-    }
-    //Do contrário copia o nome de usuario do arquivo para o registroAtual
-    else
-    {
-        fread(registroAtual->nomeUsuario, sizeof(char), registroAtual->tamanhoNomeUsuario, arq);
+    fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
+    if(registroAtual->tamanhoNomeUsuario > 0) {
+        registroAtual->nomeUsuario = malloc((registroAtual->tamanhoNomeUsuario + 1));
+        fread(registroAtual->nomeUsuario, registroAtual->tamanhoNomeUsuario, 1, arq);
         registroAtual->nomeUsuario[registroAtual->tamanhoNomeUsuario] = '\0';
+    } else {
+        // Aloca espaço mínimo para o nome de usuário
+        registroAtual->nomeUsuario = malloc(1);
+        registroAtual->nomeUsuario[0] = '\0';
     }
     // Retorna o registro atual
     return registroAtual;
@@ -103,9 +90,17 @@ void leRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
     fread(&registro->removido, sizeof(registro->removido), 1, arquivo);
     fread(&registro->idPessoaQueSegue, sizeof(registro->idPessoaQueSegue), 1, arquivo);
     fread(&registro->idPessoaQueESeguida, sizeof(registro->idPessoaQueESeguida), 1, arquivo);
-    fread(&registro->dataInicioQueSegue, sizeof(registro->dataInicioQueSegue), 1, arquivo);
-    fread(&registro->dataFimQueSegue, sizeof(registro->dataFimQueSegue), 1, arquivo);
+    fread(registro->dataInicioQueSegue, 10, 1, arquivo);  // Lê exatamente 10 bytes
+    registro->dataInicioQueSegue[10] = '\0';              // Adiciona terminador nulo
+    fread(registro->dataFimQueSegue, 10, 1, arquivo);     // Lê exatamente 10 bytes
+    registro->dataFimQueSegue[10] = '\0';                 // Adiciona terminador nulo
     fread(&registro->grauAmizade, sizeof(registro->grauAmizade), 1, arquivo);
+}
+
+// Lê um registro de índice do arquivo binário
+void leRegistroIndice(FILE *arquivo, RegistroIndice *registro) {
+    fread(&registro->idPessoa, sizeof(registro->idPessoa), 1, arquivo);
+    fread(&registro->byteOffset, sizeof(registro->byteOffset), 1, arquivo);
 }
 
 // Libera a memória de um registro de pessoa

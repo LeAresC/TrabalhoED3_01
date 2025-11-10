@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <string.h>
+#include "data_structs.h"
 
 char* obterProximoCampo(char **linha) {
     //Declaração de variáveis
@@ -34,4 +35,16 @@ char* obterProximoCampo(char **linha) {
     }
 
     return campo;
+}
+
+// Função para comparar dois registros de índice pelo campo idPessoa
+int compararRegistrosIndice(const void *a, const void *b) {
+    // Cast dos ponteiros para o tipo correto
+    const RegistroIndice *regA = (const RegistroIndice *)a;
+    const RegistroIndice *regB = (const RegistroIndice *)b;
+    
+    // Comparação simples dos campos idPessoa
+    if (regA->idPessoa < regB->idPessoa) return -1;
+    if (regA->idPessoa > regB->idPessoa) return 1;
+    return 0;
 }

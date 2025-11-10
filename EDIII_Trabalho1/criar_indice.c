@@ -2,12 +2,11 @@
 #include <string.h>
 #include "data_structs.h"
 #include "criar_indice.h"
-#include "escreve_cabecalho.h"
+#include "io_cabecalho.h"
 
 int criarIndice(const char *nomeArquivo){
     // Declaração de variáveis
     FILE *arquivoIndice;
-    CabecalhoIndice dataHeader;
     // Abre o arquivo de índice para escrita binária
     arquivoIndice = fopen(nomeArquivo, "wb");
     // Verifica se o arquivo foi aberto corretamente

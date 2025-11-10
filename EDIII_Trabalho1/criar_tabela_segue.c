@@ -4,7 +4,7 @@
 #include "data_structs.h"
 #include "criar_tabela_segue.h"
 #include "utils.h"
-#include "escreve_cabecalho.h"
+#include "io_cabecalho.h"
 #include "io_csv.h"
 #include "io_registro.h"
 #define MAXIMO 500
