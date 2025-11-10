@@ -12,5 +12,8 @@ RegistroPessoa *leRegistro(FILE *arq);
 int buscaBinariaIndice(FILE *arqI, int valorCampo);
 CabecalhoPessoa *leCabecalho(FILE *arq);
 void scanQuoteString(char *str);
+void leCriterioBusca(char *campo, char *valor);
+RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices,
+                              CabecalhoPessoa *cabecalhoPessoa, char *nomeCampo, char *valorCampo, int *counter);
 
 #endif // AUXILIARES_BUSCA_H

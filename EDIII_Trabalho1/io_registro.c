@@ -108,6 +108,12 @@ void leRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
     fread(&registro->grauAmizade, sizeof(registro->grauAmizade), 1, arquivo);
 }
 
+// Lê um registro de índice do arquivo binário
+void leRegistroIndice(FILE *arquivo, RegistroIndice *registro) {
+    fread(&registro->idPessoa, sizeof(registro->idPessoa), 1, arquivo);
+    fread(&registro->byteOffset, sizeof(registro->byteOffset), 1, arquivo);
+}
+
 // Libera a memória de um registro de pessoa
 void liberaRegistroPessoa(RegistroPessoa *registro) {
     if (registro != NULL) {

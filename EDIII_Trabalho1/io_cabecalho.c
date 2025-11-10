@@ -37,11 +37,21 @@ void escreveCabecalhoSegue(FILE *arquivoSegue, char status, int quantidadePessoa
     fwrite(&dataHeader.proxRRN, sizeof(dataHeader.proxRRN), 1, arquivoSegue);
 }
 
-CabecalhoSegue leCabecalhoSegue(FILE *arquivo) {
+CabecalhoSegue leCabecalhoSegue(FILE *arquivoSegue) {
     // Le o cabeçalho do arquivo de dados
     CabecalhoSegue cabecalho;
-    fread(&cabecalho.status, sizeof(char), 1 , arquivo);
-    fread(&cabecalho.quantidadePessoas, sizeof(int), 1 ,arquivo);
-    fread(&cabecalho.proxRRN, sizeof(long long int), 1, arquivo);
+    fread(&cabecalho.status, sizeof(char), 1 , arquivoSegue);
+    fread(&cabecalho.quantidadePessoas, sizeof(int), 1 ,arquivoSegue);
+    fread(&cabecalho.proxRRN, sizeof(long long int), 1, arquivoSegue);
+    return cabecalho;
+}
+
+CabecalhoPessoa leCabecalhoPessoa(FILE *arquivoPessoa) {
+    // Le o cabeçalho do arquivo de dados
+    CabecalhoPessoa cabecalho;
+    fread(&cabecalho.status, sizeof(char), 1 , arquivoPessoa);
+    fread(&cabecalho.quantidadePessoas, sizeof(int), 1 ,arquivoPessoa);
+    fread(&cabecalho.quantidadeRemovidos, sizeof(int), 1, arquivoPessoa);
+    fread(&cabecalho.proxByteOffset, sizeof(long long int), 1, arquivoPessoa);
     return cabecalho;
 }
