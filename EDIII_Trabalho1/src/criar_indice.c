@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <string.h>
-#include "data_structs.h"
 #include "criar_indice.h"
-#include "io_cabecalho.h"
 
 int criarIndice(const char *nomeArquivo){
     // Declaração de variáveis
     FILE *arquivoIndice;
+    CabecalhoIndice dataHeader;
     // Abre o arquivo de índice para escrita binária
     arquivoIndice = fopen(nomeArquivo, "wb");
     // Verifica se o arquivo foi aberto corretamente
@@ -14,8 +13,13 @@ int criarIndice(const char *nomeArquivo){
         return 0;
     }
 
-    // Chama a função para escrever o cabeçalho do índice com status '1' (consistente)
-    escreveCabecalhoIndice(arquivoIndice, '1');
+    // Inicializa o cabeçalho do índice
+    dataHeader.status = '1';
+    memset(dataHeader.lixo, '$', sizeof(dataHeader.lixo));
+
+    // Escreve o cabeçalho no arquivo de índice
+    fwrite(&dataHeader.status, sizeof(dataHeader.status), 1, arquivoIndice);
+    fwrite(dataHeader.lixo, sizeof(dataHeader.lixo), 1, arquivoIndice);
 
     // Fecha o arquivo de índice e retorna sucesso
     fclose(arquivoIndice);

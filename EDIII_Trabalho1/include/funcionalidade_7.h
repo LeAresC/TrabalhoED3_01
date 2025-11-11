@@ -1,0 +1,1 @@
+int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N);
