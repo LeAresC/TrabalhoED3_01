@@ -3,15 +3,17 @@
 #include <stdio.h>
 #include "data_structs.h"
 
+RegistroIndice **leArquivoIndice(FILE *arqI, int N);
+RegistroPessoa *leRegistroPessoa(FILE *arq);
+CabecalhoIndice *leCabecalhoIndice(FILE *arqI);
+CabecalhoPessoa *leCabecalhoPessoa(FILE *arqD);
 void erroAbertura();
 void erroRegistro();
 void imprimirSaida(RegistroPessoa *registroAtual);
-int lerArquivoBinario(char *nomeDoArquivo);
-int buscaEmArquivo(char *arquivoDados, char *arquivoIndice,int qtd);
-int buscaBinariaIndice(FILE *arqI, int valorCampo);
 void scanQuoteString(char *str);
-void leCriterioBusca(char *campo, char *valor);
-RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices,
-                              char *nomeCampo, char *valorCampo, int *counter);
-
+long *buscaDados(FILE *arqD,RegistroIndice **DadosIndice, char *nomeCampo, char *valorCampo);
+int buscaBinariaIndice(RegistroIndice** ArquivoIndice, int tamanhoVetor, int valorCampo);
+int determinarCampoBusca(char *nomeCampo);
+void descartaLixo(FILE *arqD);
+void leInput(char *nomeCampo, char *valorCampo);
 #endif // AUXILIARES_BUSCA_H

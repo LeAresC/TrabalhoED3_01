@@ -3,9 +3,105 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "auxiliares_busca.h"
-#include "io_registro.h"
-#include "utils.h"
-#define MAXIMO 500
+#include "utilidades.h"
+#define MAXIMO 2000
+
+int determinarCampoBusca(char *nomeCampo)
+{
+    // Modulariza o campo de busca
+    if (strcmp(nomeCampo, "idPessoa") == 0)
+        return 0;
+    if (strcmp(nomeCampo, "idadePessoa") == 0)
+        return 1;
+    if (strcmp(nomeCampo, "nomePessoa") == 0)
+        return 2;
+    if (strcmp(nomeCampo, "nomeUsuario") == 0)
+        return 3;
+
+    return -1;
+}
+
+void leInput(char *nomeCampo, char *valorCampo)
+{
+    // Le input do tipo nomeCampo=valorCampo se valorCampo=NULO retorna string de tamanho 0
+    scanf(" %999[^=]=", nomeCampo);
+    if ((strcmp(nomeCampo, "nomePessoa") == 0) || (strcmp(nomeCampo, "nomeUsuario") == 0))
+        scanQuoteString(valorCampo);
+    else
+        scanf("%s", valorCampo);
+
+    char string_nula[] = "";
+    if (strcmp(valorCampo, "NULO") == 0)
+    {
+        strcpy(valorCampo, string_nula);
+    }
+}
+
+void descartaLixo(FILE *arqD)
+{
+    // Le o lixo que ficou no final do registro passado
+    char aux;
+    do
+    {
+        fread(&aux, sizeof(char), 1, arqD);
+    } while (aux == '$');
+    fseek(arqD, -1, SEEK_CUR);
+}
+
+RegistroPessoa *leRegistroPessoa(FILE *arq)
+{
+    // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
+    RegistroPessoa *registroAtual = (RegistroPessoa *)malloc(sizeof(RegistroPessoa));
+    fread(&registroAtual->removido, sizeof(char), 1, arq);
+    fread(&registroAtual->tamanhoRegistro, sizeof(int), 1, arq);
+
+    // So o registro atual foi removido retorna o registroAtual como está
+    if (registroAtual->removido == '1')
+    {
+        return registroAtual;
+    }
+
+    // Lê id idade e tamanhoNome
+    fread(&registroAtual->idPessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->idadePessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->tamanhoNomePessoa, sizeof(int), 1, arq);
+
+    // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
+    registroAtual->nomePessoa = malloc(sizeof(char) * (MAXIMO));
+
+    // Se não houver nome copia "-" para o registroAtual
+    if (registroAtual->tamanhoNomePessoa == 0)
+    {
+        strcpy(registroAtual->nomePessoa, "-");
+        registroAtual->nomePessoa[1] = '\0';
+    }
+
+    // Do contrário copia o nome do arquivo para o registroAtual
+    else
+    {
+        fread(registroAtual->nomePessoa, sizeof(char), registroAtual->tamanhoNomePessoa, arq);
+        registroAtual->nomePessoa[registroAtual->tamanhoNomePessoa] = '\0';
+    }
+    fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
+
+    // Aloca espaço para o nomeusuario = tamanhoNomeUsuario + (1byte) do \0
+    registroAtual->nomeUsuario = malloc(sizeof(char) * (MAXIMO));
+
+    // Se não houver usuario copia "-" para o registroAtual
+    if (registroAtual->tamanhoNomeUsuario == 0)
+    {
+        strcpy(registroAtual->nomeUsuario, "-");
+        registroAtual->nomeUsuario[1] = '\0';
+    }
+    // Do contrário copia o nome de usuario do arquivo para o registroAtual
+    else
+    {
+        fread(registroAtual->nomeUsuario, sizeof(char), registroAtual->tamanhoNomeUsuario, arq);
+        registroAtual->nomeUsuario[registroAtual->tamanhoNomeUsuario] = '\0';
+    }
+    // Retorna o registro atual
+    return registroAtual;
+}
 
 void imprimirSaida(RegistroPessoa *registroAtual)
 {
@@ -22,163 +118,183 @@ void imprimirSaida(RegistroPessoa *registroAtual)
 
 void erroAbertura()
 {
-    //Imprime o erro de abertura do arquivo
+    // Imprime o erro de abertura do arquivo
     printf("Falha no processamento do arquivo.\n");
 }
 
 void erroRegistro()
 {
-    //Imprime o erro de registro
+    // Imprime o erro de registro
     printf("Registro inexistente.\n");
 }
 
-void scanQuoteString(char *str)
+CabecalhoPessoa *leCabecalhoPessoa(FILE *arq)
+{
+    // Le o cabeçalho do arquivo de dados
+    CabecalhoPessoa *cabecalho = (CabecalhoPessoa *)malloc(sizeof(CabecalhoPessoa));
+    fread(&cabecalho->status, sizeof(char), 1, arq);
+    fread(&cabecalho->quantidadePessoas, sizeof(int), 1, arq);
+    fread(&cabecalho->quantidadeRemovidos, sizeof(int), 1, arq);
+    fread(&cabecalho->proxByteOffset, sizeof(long long int), 1, arq);
+    return cabecalho;
+}
+
+CabecalhoIndice *leCabecalhoIndice(FILE *arqI)
+{
+    // Le o cabecalho do arquivo de Indice
+    CabecalhoIndice *CabecalhoI = (CabecalhoIndice *)malloc(sizeof(CabecalhoIndice));
+    fread(&CabecalhoI->status, sizeof(CabecalhoI->status), 1, arqI);
+    fread(CabecalhoI->lixo, sizeof(CabecalhoI->lixo), 1, arqI);
+    return CabecalhoI;
+}
+
+RegistroIndice **leArquivoIndice(FILE *arqI, int N)
 {
 
-    /*
-     *	Use essa função para ler um campo string delimitado entre aspas (").
-     *	Chame ela na hora que for ler tal campo. Por exemplo:
-     *
-     *	A entrada está da seguinte forma:
-     *		nomeDoCampo "MARIA DA SILVA"
-     *
-     *	Para ler isso para as strings já alocadas str1 e str2 do seu programa, você faz:
-     *		scanf("%s", str1); // Vai salvar nomeDoCampo em str1
-     *		scanQuoteString(str2); // Vai salvar MARIA DA SILVA em str2 (sem as aspas)
-     *
-     */
-
-    char R;
-
-    while ((R = getchar()) != EOF && isspace(R))
-        ; // ignorar espaços, \r, \n...
-
-    if (R == 'N' || R == 'n')
-    { // campo NULO
-        getchar();
-        getchar();
-        getchar();       // ignorar o "ULO" de NULO.
-        strcpy(str, ""); // copia string vazia
-    }
-    else if (R == '\"')
+    // Le o arquivo de Indice como um todo
+    fseek(arqI, 0, SEEK_SET);
+    CabecalhoIndice *CabecalhoI = leCabecalhoIndice(arqI);
+    RegistroIndice **ArquivoCompleto = (RegistroIndice **)malloc(sizeof(RegistroIndice *) * MAXIMO);
+    for (int i = 0; i < N; i++)
     {
-        if (scanf("%[^\"]", str) != 1)
-        { // ler até o fechamento das aspas
-            strcpy(str, "");
+
+        ArquivoCompleto[i] = (RegistroIndice *)malloc(sizeof(RegistroIndice));
+        fread(&ArquivoCompleto[i]->idPessoa, sizeof(int), 1, arqI);
+        fread(&ArquivoCompleto[i]->byteOffset, sizeof(long long int), 1, arqI);
+    }
+    free(CabecalhoI);
+    return ArquivoCompleto;
+}
+
+int buscaBinariaIndice(RegistroIndice **ArquivoIndice, int tamanhoVetor, int valorId)
+{
+    // Faz a busca binária no arquivo de indice
+    int l = 0;
+    int r = tamanhoVetor;
+    // Faz a busca binária no arquivo de indice
+    while (l < r)
+    {
+        int id;
+        int indice = l + (r - l) / 2;
+        // Le e armazena o ID e RRN atual correspondente
+        id = ArquivoIndice[indice]->idPessoa;
+        // Se o id atual foir maior que o procurado r = mid
+        if (id > valorId)
+        {
+            r = indice;
         }
-        getchar(); // ignorar aspas fechando
+        // Do contrário se o id atual for menor que o procurado l = mid + 1
+        else if (id < valorId)
+        {
+            l = indice + 1;
+        }
+
+        // Se encontrou o ID retorna o indice equivalente
+        else if (id == valorId)
+        {
+            return indice;
+        }
     }
-    else if (R != EOF)
-    { // vc tá tentando ler uma string que não tá entre aspas! Fazer leitura normal %s então, pois deve ser algum inteiro ou algo assim...
-        str[0] = R;
-        scanf("%s", &str[1]);
+    // Se não encontrou o ID retorna -1 (Inválido)
+    return -1;
+}
+
+// Retorna uma lista de offsets
+long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char *valorCampo)
+{
+    fseek(arqD, 0, SEEK_SET);
+    CabecalhoPessoa *Cabecalho = leCabecalhoPessoa(arqD);
+    // Declara a lista de Offsets encontrados e define um contador da quantidade de registros encontraodr
+    long *DadosEncontrados = (long *)malloc(sizeof(long) * (MAXIMO));
+    for (int i = 0; i < MAXIMO; i++)
+    {
+        DadosEncontrados[i] = -1;
     }
+    // Seta um contador para a quantidade de dados encontrados
+    int Contador = 0;
+    // Seta um contador para a quantidade de dados válidos(não removidos) lidos
+    int qtdDados = 0;
+    // Determina o campo de busca (0 = idPessoa; 1 = idadePessoa; 2 = nomePessoa; 3 = nomeUsuario)
+    int campoBusca = determinarCampoBusca(nomeCampo);
+    // Campo que verifica qual o offset atual;
+    long OffsetAtual = 17;
+    // Se a procura for por ID realiza uma busca binaria para achar o RRN correspondente
+    if (campoBusca == 0)
+    {
+        // Procura por o offset correspondente ao ID, se não encontrar retorna -1
+        int valorID = atoi(valorCampo);
+        int indice = buscaBinariaIndice(DadosIndice, Cabecalho->quantidadePessoas, valorID);
+        if (indice != -1)
+        {
+            DadosEncontrados[Contador] = DadosIndice[indice]->byteOffset;
+        }
+    }
+    // Se a procura for por idade nome e usuario
     else
-    { // EOF
-        strcpy(str, "");
-    }
-}
-
-void leCriterioBusca(char *nomeCampo, char *valorCampo) {
-    int lixo;
-    char buffer[2];
-
-    // Lê o critério de busca no formato "campo=valor"
-    scanf("%d %[^=]", &lixo, nomeCampo);
-    if (strcmp(nomeCampo, "idPessoa") == 0 || strcmp(nomeCampo, "idadePessoa") == 0) {
-        // É um int. Consome o '=' e lê o valor como string.
-        scanf("%1s%s", buffer, valorCampo);
-    } else {
-        // É uma string. Consome o '=' e chama scanQuoteString.
-        scanf("%1s", buffer);
-        scanQuoteString(valorCampo);
-    }
-}
-
-RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices, char *nomeCampo, char *valorCampo, int *counter) {    
-    // Declara variáveis
-    RegistroPessoa** lista;
-    RegistroPessoa* registro;
-    int capacidade, match, valorId;
-    long byteOffset;
-    RegistroIndice chaveBusca;
-
-    // Inicializa o contador de registros encontrados
-    *counter = 0;
-    lista = NULL;
-
-    // Se a busca for por idPessoa, usa busca binária no índice
-    if (strcmp(nomeCampo, "idPessoa") == 0) {
-        
-        // Constrói a chave de busca
-        valorId = atoi(valorCampo);
-        chaveBusca.idPessoa = valorId;
-
-        // Realiza a busca binária no índice
-        RegistroIndice *resultado = (RegistroIndice*) bsearch(&chaveBusca, registroIndice, quantidadeIndices, sizeof(RegistroIndice), compararRegistrosIndice);
-
-        // Se não encontrar, retorna NULL
-        if (resultado == NULL) {
-            return NULL; 
-        }
-
-        // Se encontrar, lê o registro correspondente no arquivo de pessoas
-        byteOffset = resultado->byteOffset;
-        fseek(arquivoPessoa, byteOffset, SEEK_SET);
-        registro = leRegistroPessoa(arquivoPessoa); 
-
-        // Se o registro for nulo ou removido, libera e retorna NULL
-        if (registro == NULL || registro->removido == '1') {
-            if (registro) liberaRegistroPessoa(registro);
-            return NULL;
-        }
-
-        // Caso contrário, adiciona o registro à lista e retorna
-        lista = (RegistroPessoa**) malloc(sizeof(RegistroPessoa*));
-        lista[0] = registro;
-        *counter = 1;
-        return lista;
-
-    } else {
-        // Busca sequencial para os outros campos
-        fseek(arquivoPessoa, 17, SEEK_SET);
-        capacidade = 0;
-
-        // Percorre todo o arquivo de pessoas
-        while ((registro = leRegistroPessoa(arquivoPessoa)) != NULL) {
-            // Se estiver removido, libera e continua
-            if (registro->removido == '1') {
-                liberaRegistroPessoa(registro);
+    {
+        // Busca sequencial no arquivo de dados até o seu fim
+        while (qtdDados < Cabecalho->quantidadePessoas)
+        {
+            // Descarta o lixo do final do registro anterior e posiciona o cursor corretamente
+            descartaLixo(arqD);
+            // Le o registro atual
+            RegistroPessoa *registroAtual = leRegistroPessoa(arqD);
+            // Se o registro atual estiver removido pula para o próximo
+            if (registroAtual->removido == '1')
+            {
+                fseek(arqD, registroAtual->tamanhoRegistro, SEEK_CUR);
+                OffsetAtual += registroAtual->tamanhoRegistro + 5;
+                free(registroAtual);
                 continue;
             }
 
-            // Verifica se o registro atual corresponde ao critério de busca
-            match = 0;
-            if (strcmp(nomeCampo, "idadePessoa") == 0) {
-                if (registro->idadePessoa == atoi(valorCampo)) match = 1;
-            } else if (strcmp(nomeCampo, "nomePessoa") == 0) {
-                if (registro->tamanhoNomePessoa > 0 && strcmp(registro->nomePessoa, valorCampo) == 0) match = 1;
-            } else if (strcmp(nomeCampo, "nomeUsuario") == 0) { 
-                if (registro->tamanhoNomeUsuario > 0 && strcmp(registro->nomeUsuario, valorCampo) == 0) match = 1;
+            // Se não estiver removido verifica se a o registro atual satisfaz o filtro
+            else if (campoBusca == 1)
+            {
+                if (strlen(valorCampo) == 0 && registroAtual->idadePessoa == -1)
+                {
+                    DadosEncontrados[Contador] = OffsetAtual;
+                    Contador++;
+                }
+                else
+                {
+                    if (atoi(valorCampo) == registroAtual->idadePessoa)
+                    {
+                        DadosEncontrados[Contador] = OffsetAtual;
+                        Contador++;
+                    }
+                }
+            }
+            else if (campoBusca == 2)
+            {
+                if (((strlen(valorCampo) == 0) && strcmp(registroAtual->nomePessoa, "-") == 0) || (strcmp(registroAtual->nomePessoa, valorCampo) == 0))
+                {
+                    DadosEncontrados[Contador] = OffsetAtual;
+                    Contador++;
+                }
+            }
+            else if (campoBusca == 3)
+            {
+                if (((strlen(valorCampo) == 0) && strcmp(registroAtual->nomeUsuario, "-") == 0) || (strcmp(registroAtual->nomeUsuario, valorCampo) == 0))
+                {
+                    DadosEncontrados[Contador] = OffsetAtual;
+                    Contador++;
+                    break;
+                }
             }
 
-            // Se o registro bate com o critério, adiciona à lista
-            if (match) {
-                // Verifica se precisa aumentar a capacidade da lista
-                if (*counter == capacidade) {
-                    // Se capacidade for 0, inicializa com 8, senão dobra
-                    capacidade = (capacidade == 0) ? 8 : capacidade * 2;
-                    lista = (RegistroPessoa**) realloc(lista, capacidade * sizeof(RegistroPessoa*));
-                }
-                // Adiciona o registro à lista e incrementa o contador
-                lista[*counter] = registro;
-                (*counter)++;
-            } else {
-                // Se não bate, libera o registro
-                liberaRegistroPessoa(registro);
-            }
+            // Aumenta a quantidade de dados lidos
+            qtdDados++;
+            // Atualiza o OffsetAtual
+            OffsetAtual += registroAtual->tamanhoRegistro + 5;
+            // Libera memória
+            free(registroAtual->nomePessoa);
+            free(registroAtual->nomeUsuario);
+            free(registroAtual);
         }
-        // Retorna a lista de registros encontrados
-        return lista;
     }
+
+    // Libera a memoria do cabecalho e retorna os Offsets encontrados
+    free(Cabecalho);
+    return DadosEncontrados;
 }
