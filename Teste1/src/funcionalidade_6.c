@@ -42,7 +42,7 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
 
     for (int i = 0; i < N; i++)
     {
-
+        // Declara variáveis e LeInput
         int cnt;
         char nomePessoa[MAXIMO];
         char nomeUsuario[MAXIMO];
@@ -54,20 +54,26 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
         scanf("%c %999[^,],", &aux, idadePessoa);
         scanQuoteString(nomeUsuario);
 
+        
+        // Prepara um registro para receber os Dados
         RegistroPessoa *novoDado = preparaRegistro(nomePessoa, nomeUsuario, valorId, idadePessoa);
 
+        // Usa o registro para atualizar o arquivo pessoa em Disco , e indice em RAM
         inserePessoa(arqD,CabecalhoP->proxByteOffset,novoDado);
         DadosIndice[CabecalhoP->quantidadePessoas] = malloc(sizeof(RegistroIndice));
         insereFinalIndice(DadosIndice, CabecalhoP->quantidadePessoas, novoDado->idPessoa, CabecalhoP->proxByteOffset);
 
+        // Atualiza o Cabecalho Pessoa em ram
         CabecalhoP->quantidadePessoas++;
         CabecalhoP->proxByteOffset += novoDado->tamanhoRegistro + 5;
 
         free(novoDado->nomePessoa);
         free(novoDado->nomeUsuario);
         free(novoDado);
+        // Atualiza o cabecalho Pessoa em disco
         atualizaCabecalhoPessoa(arqD, CabecalhoP);
     }
+    // Fecha arquivos, libera a memória e escreve no arquivo de Indice em Disco
     fclose(arqI);
     escreveIndice(arquivoIndice, DadosIndice, CabecalhoP->quantidadePessoas);
     for(int i = 0; i < CabecalhoP->quantidadePessoas; i++)
