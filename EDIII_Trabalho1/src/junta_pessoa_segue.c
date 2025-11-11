@@ -149,7 +149,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
     FILE *arquivoPessoa;
     FILE *arquivoSegue;
     FILE *arquivoIndice;
-    CabecalhoPessoa cabecalhoPessoa;
+    CabecalhoPessoa *cabecalhoPessoa;
     CabecalhoSegue cabecalhoSegue;
     int quantidadeIndices, matchCountPessoa, quantidadeSegue, matchCountSegue;
     RegistroIndice* registroIndice;
@@ -178,7 +178,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
     cabecalhoSegue = leCabecalhoSegue(arquivoSegue);
     
     // Verifica o status dos arquivos
-    if (cabecalhoPessoa.status == '0' || cabecalhoSegue.status == '0') {
+    if (cabecalhoPessoa->status == '0' || cabecalhoSegue.status == '0') {
         erroAbertura();
         fclose(arquivoPessoa);
         fclose(arquivoSegue);
@@ -191,7 +191,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
     fseek(arquivoSegue, 9, SEEK_SET);
 
     // Identifica a quantidade de registros
-    quantidadeIndices = cabecalhoPessoa.quantidadePessoas + cabecalhoPessoa.quantidadeRemovidos;
+    quantidadeIndices = cabecalhoPessoa->quantidadePessoas + cabecalhoPessoa->quantidadeRemovidos;
     quantidadeSegue = cabecalhoSegue.quantidadePessoas;
     
     // Armazena dinâmicamente os registros de indice e segue baseado na quantidade lida
@@ -215,7 +215,8 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
     // Loop para processar os critérios de busca
     for (i = 0; i < n; i++) {
         // Lê o critério de busca
-        leCriterioBusca(nomeCampo, valorCampo);
+        int cnt; scanf("%d", &cnt);
+        leInput(nomeCampo, valorCampo);
 
         // Busca as pessoas que atendem ao critério
         matchCountPessoa = 0;

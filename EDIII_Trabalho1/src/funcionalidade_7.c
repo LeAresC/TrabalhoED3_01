@@ -28,8 +28,7 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
     {
 
         // Declara variáveis e le o Input
-        int cnt;
-        scanf("%d", &cnt);
+        int cnt; scanf("%d", &cnt);
         char nomeCampo1[MAXIMO];
         char valorCampo1[MAXIMO];
         char nomeCampo2[MAXIMO];
