@@ -8,20 +8,22 @@
 
 int determinarCampoBusca(char *nomeCampo)
 {
-    if(strcmp(nomeCampo, "idPessoa") == 0)
-    return 0;
-    if(strcmp(nomeCampo, "idadePessoa") == 0)
-    return 1;
-    if(strcmp(nomeCampo, "nomePessoa") == 0)
-    return 2;
-    if(strcmp(nomeCampo, "nomeUsuario") == 0)
-    return 3;
-    
+    // Modulariza o campo de busca
+    if (strcmp(nomeCampo, "idPessoa") == 0)
+        return 0;
+    if (strcmp(nomeCampo, "idadePessoa") == 0)
+        return 1;
+    if (strcmp(nomeCampo, "nomePessoa") == 0)
+        return 2;
+    if (strcmp(nomeCampo, "nomeUsuario") == 0)
+        return 3;
+
     return -1;
 }
 
 void leInput(char *nomeCampo, char *valorCampo)
 {
+    // Le input do tipo nomeCampo=valorCampo se valorCampo=NULO retorna string de tamanho 0
     scanf(" %999[^=]=", nomeCampo);
     if ((strcmp(nomeCampo, "nomePessoa") == 0) || (strcmp(nomeCampo, "nomeUsuario") == 0))
         scanQuoteString(valorCampo);
@@ -37,6 +39,7 @@ void leInput(char *nomeCampo, char *valorCampo)
 
 void descartaLixo(FILE *arqD)
 {
+    // Le o lixo que ficou no final do registro passado
     char aux;
     do
     {
@@ -138,6 +141,7 @@ CabecalhoPessoa *leCabecalhoPessoa(FILE *arq)
 
 CabecalhoIndice *leCabecalhoIndice(FILE *arqI)
 {
+    // Le o cabecalho do arquivo de Indice
     CabecalhoIndice *CabecalhoI = (CabecalhoIndice *)malloc(sizeof(CabecalhoIndice));
     fread(&CabecalhoI->status, sizeof(CabecalhoI->status), 1, arqI);
     fread(CabecalhoI->lixo, sizeof(CabecalhoI->lixo), 1, arqI);
@@ -146,6 +150,8 @@ CabecalhoIndice *leCabecalhoIndice(FILE *arqI)
 
 RegistroIndice **leArquivoIndice(FILE *arqI, int N)
 {
+
+    // Le o arquivo de Indice como um todo
     fseek(arqI, 0, SEEK_SET);
     CabecalhoIndice *CabecalhoI = leCabecalhoIndice(arqI);
     RegistroIndice **ArquivoCompleto = (RegistroIndice **)malloc(sizeof(RegistroIndice *) * MAXIMO);
@@ -229,7 +235,7 @@ long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char
         // Busca sequencial no arquivo de dados até o seu fim
         while (qtdDados < Cabecalho->quantidadePessoas)
         {
-            //Descarta o lixo do final do registro anterior e posiciona o cursor corretamente
+            // Descarta o lixo do final do registro anterior e posiciona o cursor corretamente
             descartaLixo(arqD);
             // Le o registro atual
             RegistroPessoa *registroAtual = leRegistroPessoa(arqD);
@@ -277,9 +283,9 @@ long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char
                 }
             }
 
-            //Aumenta a quantidade de dados lidos
+            // Aumenta a quantidade de dados lidos
             qtdDados++;
-            //Atualiza o OffsetAtual
+            // Atualiza o OffsetAtual
             OffsetAtual += registroAtual->tamanhoRegistro + 5;
             // Libera memória
             free(registroAtual->nomePessoa);
@@ -288,6 +294,7 @@ long *buscaDados(FILE *arqD, RegistroIndice **DadosIndice, char *nomeCampo, char
         }
     }
 
+    // Libera a memoria do cabecalho e retorna os Offsets encontrados
     free(Cabecalho);
     return DadosEncontrados;
 }
