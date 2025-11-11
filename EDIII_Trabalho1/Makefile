@@ -1,35 +1,16 @@
-
 CC = gcc
-CFLAGS = -Wall -g -std=c11 -Wextra
-LDFLAGS =
+CFLAGS = -Iinclude -Wall -Wextra
+SRC = $(wildcard src/*.c)
+OBJ = $(SRC:.c=.o)
+TARGET = programTrab
 
-# Arquivos fonte (todos os .c no diretório)
-SRCS := $(wildcard *.c)
-
-# Objetos gerados a partir das fontes
-OBJS := $(patsubst %.c,%.o,$(SRCS))
-
-# Nome do executável final
-TARGET = programaTrab
-
-# Arquivos binários gerados pelos testes (limpeza)
-BINS = *.bin
-
-# Regra padrão: gerar o alvo
 all: $(TARGET)
 
-# Linka todos os objetos para criar o executável
-$(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $(TARGET) $(LDFLAGS)
+$(TARGET): $(OBJ)
+	@$(CC) $(OBJ) -o $(TARGET)
 
-# Compila cada .c em .o
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+run: $(TARGET)
+	@./$(TARGET)
 
-# Executa o programa (leva em conta que 'all' já constrói)
-run: all
-	./$(TARGET)
-
-# Limpa artefatos de build
 clean:
-	rm -f $(OBJS) $(TARGET) $(BINS)
+	@rm -f $(OBJ) $(TARGET)
