@@ -126,3 +126,14 @@ void atualizaCabecalhoPessoa(FILE *arqD, CabecalhoPessoa *CabecalhoP)
     fwrite(&CabecalhoP->quantidadeRemovidos, sizeof(int), 1, arqD);
     fwrite(&CabecalhoP->proxByteOffset, sizeof(long long int), 1, arqD);
 }
+
+// Atualiza o status do arquivo como inconsistente
+void atualizaConsistencia(FILE *arqD, FILE *arqI)
+{
+    fseek(arqD, 0, SEEK_SET);
+    fseek(arqI, 0, SEEK_SET);
+
+    char consistencia = '0';
+    fwrite(&consistencia, sizeof(char), 1,  arqD);
+    fwrite(&consistencia, sizeof(char), 1,  arqI);
+}

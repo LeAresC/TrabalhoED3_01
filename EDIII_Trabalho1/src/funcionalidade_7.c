@@ -11,7 +11,7 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
 {
     // Abre os arquivos e verifica se conseguiu abrir
     FILE *arqD = fopen(arquivoDados, "r+b");
-    FILE *arqI = fopen(arquivoIndice, "rb");
+    FILE *arqI = fopen(arquivoIndice, "r+b");
     if (arqD == NULL || arqI == NULL)
     {
         return 0;
@@ -22,14 +22,16 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
     // Passa todos os dados do arquivo de Indice para a RAM
     RegistroIndice **DadosIndice = leArquivoIndice(arqI, CabecalhoP->quantidadePessoas);
 
+    // Atualiza a consistência do arquivo ('0' inconsistente)
+    atualizaConsistencia(arqD, arqI);
+
     // Declara uma variavel que ira armazenar o tamanho do indice em RAM
     int tamanhoIndice = CabecalhoP->quantidadePessoas;
     for (int i = 0; i < N; i++)
     {
 
         // Declara variáveis e le o Input
-        int cnt;
-        scanf("%d", &cnt);
+        int cnt; scanf("%d", &cnt);
         char nomeCampo1[MAXIMO];
         char valorCampo1[MAXIMO];
         char nomeCampo2[MAXIMO];

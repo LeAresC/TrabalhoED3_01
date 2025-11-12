@@ -48,13 +48,3 @@ CabecalhoSegue leCabecalhoSegue(FILE *arquivoSegue) {
     fread(&cabecalho.proxRRN, sizeof(cabecalho.proxRRN), 1, arquivoSegue);
     return cabecalho;
 }
-
-CabecalhoPessoa leCabecalhoPessoa(FILE *arquivoPessoa) {
-    // Le o cabeçalho do arquivo de dados
-    CabecalhoPessoa cabecalho;
-    fread(&cabecalho.status, sizeof(cabecalho.status), 1, arquivoPessoa);
-    fread(&cabecalho.quantidadePessoas, sizeof(cabecalho.quantidadePessoas), 1, arquivoPessoa);
-    fread(&cabecalho.quantidadeRemovidos, sizeof(cabecalho.quantidadeRemovidos), 1, arquivoPessoa);
-    fread(&cabecalho.proxByteOffset, sizeof(cabecalho.proxByteOffset), 1, arquivoPessoa);
-    return cabecalho;
-}

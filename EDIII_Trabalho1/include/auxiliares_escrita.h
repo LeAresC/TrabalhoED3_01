@@ -9,3 +9,4 @@ void removeRegistroOffsetIndice(RegistroIndice **DadosIndice, int tamanhoIndice,
 void atualizaNoIndice(RegistroIndice **DadosIndice,int tamanhoIndice, int IdAtual, long Offset, int IdAnterior);
 void atualizaCabecalhoPessoa(FILE *arqD , CabecalhoPessoa *CabecalhoP);
 void insereLixoFinalRegistro(FILE *arqD, int QuantidadeDeLixo);
+void atualizaConsistencia(FILE *arqD, FILE *arqI);

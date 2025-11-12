@@ -11,10 +11,10 @@ RegistroPessoa *preparaRegistro(char *nomePessoa, char *nomeUsuario, char *valor
 {
     RegistroPessoa *novoDado = (RegistroPessoa *)malloc(sizeof(RegistroPessoa));
     novoDado->removido = '0';
-    novoDado->nomePessoa = (char *)malloc(sizeof(char)*MAXIMO);
-    novoDado->nomeUsuario = (char *)malloc(sizeof(char)*MAXIMO);
-    strcpy(novoDado->nomePessoa,nomePessoa);
-    strcpy(novoDado->nomeUsuario,nomeUsuario);
+    novoDado->nomePessoa = (char *)malloc(sizeof(char) * MAXIMO);
+    novoDado->nomeUsuario = (char *)malloc(sizeof(char) * MAXIMO);
+    strcpy(novoDado->nomePessoa, nomePessoa);
+    strcpy(novoDado->nomeUsuario, nomeUsuario);
     novoDado->tamanhoNomePessoa = strlen(novoDado->nomePessoa);
     novoDado->tamanhoNomeUsuario = strlen(novoDado->nomeUsuario);
 
@@ -30,15 +30,21 @@ RegistroPessoa *preparaRegistro(char *nomePessoa, char *nomeUsuario, char *valor
 
 int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
 {
+    // Abre os arquivos e verifica se conseguiu abrir
     FILE *arqD = fopen(arquivoDados, "r+b");
-    FILE *arqI = fopen(arquivoIndice, "rb");
+    FILE *arqI = fopen(arquivoIndice, "r+b");
     if (arqD == NULL || arqI == NULL)
     {
         return 0;
     }
+    // Le o cabecalho do arquivo pessoa
     CabecalhoPessoa *CabecalhoP = leCabecalhoPessoa(arqD);
 
+    // Passa todos os dados do arquivo de Indice para a RAM
     RegistroIndice **DadosIndice = leArquivoIndice(arqI, CabecalhoP->quantidadePessoas);
+
+    // Atualiza a consistência do arquivo ('0' inconsistente)
+    atualizaConsistencia(arqD, arqI);
 
     for (int i = 0; i < N; i++)
     {
@@ -54,12 +60,11 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
         scanf("%c %999[^,],", &aux, idadePessoa);
         scanQuoteString(nomeUsuario);
 
-        
         // Prepara um registro para receber os Dados
         RegistroPessoa *novoDado = preparaRegistro(nomePessoa, nomeUsuario, valorId, idadePessoa);
 
         // Usa o registro para atualizar o arquivo pessoa em Disco , e indice em RAM
-        inserePessoa(arqD,CabecalhoP->proxByteOffset,novoDado);
+        inserePessoa(arqD, CabecalhoP->proxByteOffset, novoDado);
         DadosIndice[CabecalhoP->quantidadePessoas] = malloc(sizeof(RegistroIndice));
         insereFinalIndice(DadosIndice, CabecalhoP->quantidadePessoas, novoDado->idPessoa, CabecalhoP->proxByteOffset);
 
@@ -76,7 +81,7 @@ int insereNoFinal(char *arquivoDados, char *arquivoIndice, int N)
     // Fecha arquivos, libera a memória e escreve no arquivo de Indice em Disco
     fclose(arqI);
     escreveIndice(arquivoIndice, DadosIndice, CabecalhoP->quantidadePessoas);
-    for(int i = 0; i < CabecalhoP->quantidadePessoas; i++)
+    for (int i = 0; i < CabecalhoP->quantidadePessoas; i++)
     {
         free(DadosIndice[i]);
     }
