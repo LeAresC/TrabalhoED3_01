@@ -33,7 +33,7 @@ void escreveCabecalhoSegue(FILE *arquivoSegue, char status, int quantidadePessoa
     dataHeader.status = status;
     dataHeader.quantidadePessoas = quantidadePessoas;
     dataHeader.proxRRN = proxRRN;
-
+   
     // Escreve o cabeçalho no arquivo de segue
     fwrite(&dataHeader.status, sizeof(dataHeader.status), 1, arquivoSegue);
     fwrite(&dataHeader.quantidadePessoas, sizeof(dataHeader.quantidadePessoas), 1, arquivoSegue);

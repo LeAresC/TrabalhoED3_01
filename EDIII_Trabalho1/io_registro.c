@@ -25,8 +25,8 @@ void escreveRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
     fwrite(&registro->removido, sizeof(registro->removido), 1, arquivo);
     fwrite(&registro->idPessoaQueSegue, sizeof(registro->idPessoaQueSegue), 1, arquivo);
     fwrite(&registro->idPessoaQueESeguida, sizeof(registro->idPessoaQueESeguida), 1, arquivo);
-    fwrite(registro->dataInicioQueSegue, 10, 1, arquivo);  // Escreve exatamente 10 bytes
-    fwrite(registro->dataFimQueSegue, 10, 1, arquivo);     // Escreve exatamente 10 bytes
+    fwrite(registro->dataInicioQueSegue, 10, 1, arquivo); // Escreve exatamente 10 bytes
+    fwrite(registro->dataFimQueSegue, 10, 1, arquivo); // Escreve exatamente 10 bytes
     fwrite(&registro->grauAmizade, sizeof(registro->grauAmizade), 1, arquivo);
 }
 
@@ -41,8 +41,12 @@ RegistroPessoa *leRegistroPessoa(FILE *arq)
     // Le e o status do arquivo e seu tamanho e guarda os resultados em um buffer
     char buffer1;
     int buffer2;
-    fread(&buffer1, sizeof(char), 1, arq);
-    fread(&buffer2, sizeof(int), 1, arq);
+    size_t result;
+    result = fread(&buffer1, sizeof(char), 1, arq);
+    if (result == 0) {
+        return NULL;
+    }
+    result = fread(&buffer2, sizeof(int), 1, arq);
 
     // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
     RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(sizeof(RegistroPessoa));
@@ -87,6 +91,7 @@ RegistroPessoa *leRegistroPessoa(FILE *arq)
 
 // Lê um registro de segue do arquivo binário
 void leRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
+
     fread(&registro->removido, sizeof(registro->removido), 1, arquivo);
     fread(&registro->idPessoaQueSegue, sizeof(registro->idPessoaQueSegue), 1, arquivo);
     fread(&registro->idPessoaQueESeguida, sizeof(registro->idPessoaQueESeguida), 1, arquivo);

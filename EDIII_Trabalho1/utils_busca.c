@@ -1,100 +1,34 @@
-#include <string.h>
-#include <stdio.h>
+#include "utils_busca.h"
 #include <stdlib.h>
-#include <ctype.h>
-#include "auxiliares_busca.h"
+#include <string.h>
+#include "data_structs.h"
 #include "io_registro.h"
-#include "utils.h"
-#define MAXIMO 500
 
-void imprimirSaida(RegistroPessoa *registroAtual)
-{
-    // Imprime o registroAtual segundo as especificações do trabalho
-    printf("Dados da pessoa de codigo %d\n", registroAtual->idPessoa);
-    printf("Nome: %s\n", registroAtual->nomePessoa);
-    // Se a idade do registroAtual for -1 imprime "-" do contrário imprime a idade da memória
-    if (registroAtual->idadePessoa != -1)
-        printf("Idade: %d\n", registroAtual->idadePessoa);
-    else
-        printf("Idade: -\n");
-    printf("Usuario: %s\n\n", registroAtual->nomeUsuario);
+// Função para comparar dois registros de índice pelo campo idPessoa
+int compararRegistrosIndice(const void *a, const void *b) {
+    // Cast dos ponteiros para o tipo correto
+    const RegistroIndice *regA = (const RegistroIndice *)a;
+    const RegistroIndice *regB = (const RegistroIndice *)b;
+    
+    // Comparação simples dos campos idPessoa
+    if (regA->idPessoa < regB->idPessoa) return -1;
+    if (regA->idPessoa > regB->idPessoa) return 1;
+    return 0;
 }
 
-void erroAbertura()
-{
-    //Imprime o erro de abertura do arquivo
-    printf("Falha no processamento do arquivo.\n");
+// Função para comparar dois registros de segue pelo campo idPessoaQueSegue
+int compararRegistroSegue(const void *a, const void *b) {
+    // Cast dos ponteiros para o tipo correto
+    const RegistroSegue *regA = (const RegistroSegue *)a;
+    const RegistroSegue *regB = (const RegistroSegue *)b;
+    
+    // Comparar por idPessoaQueSegue
+    if (regA->idPessoaQueSegue < regB->idPessoaQueSegue) return -1;
+    if (regA->idPessoaQueSegue > regB->idPessoaQueSegue) return 1;
+    return 0;
 }
 
-void erroRegistro()
-{
-    //Imprime o erro de registro
-    printf("Registro inexistente.\n");
-}
-
-void scanQuoteString(char *str)
-{
-
-    /*
-     *	Use essa função para ler um campo string delimitado entre aspas (").
-     *	Chame ela na hora que for ler tal campo. Por exemplo:
-     *
-     *	A entrada está da seguinte forma:
-     *		nomeDoCampo "MARIA DA SILVA"
-     *
-     *	Para ler isso para as strings já alocadas str1 e str2 do seu programa, você faz:
-     *		scanf("%s", str1); // Vai salvar nomeDoCampo em str1
-     *		scanQuoteString(str2); // Vai salvar MARIA DA SILVA em str2 (sem as aspas)
-     *
-     */
-
-    char R;
-
-    while ((R = getchar()) != EOF && isspace(R))
-        ; // ignorar espaços, \r, \n...
-
-    if (R == 'N' || R == 'n')
-    { // campo NULO
-        getchar();
-        getchar();
-        getchar();       // ignorar o "ULO" de NULO.
-        strcpy(str, ""); // copia string vazia
-    }
-    else if (R == '\"')
-    {
-        if (scanf("%[^\"]", str) != 1)
-        { // ler até o fechamento das aspas
-            strcpy(str, "");
-        }
-        getchar(); // ignorar aspas fechando
-    }
-    else if (R != EOF)
-    { // vc tá tentando ler uma string que não tá entre aspas! Fazer leitura normal %s então, pois deve ser algum inteiro ou algo assim...
-        str[0] = R;
-        scanf("%s", &str[1]);
-    }
-    else
-    { // EOF
-        strcpy(str, "");
-    }
-}
-
-void leCriterioBusca(char *nomeCampo, char *valorCampo) {
-    int lixo;
-    char buffer[2];
-
-    // Lê o critério de busca no formato "campo=valor"
-    scanf("%d %[^=]", &lixo, nomeCampo);
-    if (strcmp(nomeCampo, "idPessoa") == 0 || strcmp(nomeCampo, "idadePessoa") == 0) {
-        // É um int. Consome o '=' e lê o valor como string.
-        scanf("%1s%s", buffer, valorCampo);
-    } else {
-        // É uma string. Consome o '=' e chama scanQuoteString.
-        scanf("%1s", buffer);
-        scanQuoteString(valorCampo);
-    }
-}
-
+// Função de busca para registros de pessoa
 RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices, char *nomeCampo, char *valorCampo, int *counter) {    
     // Declara variáveis
     RegistroPessoa** lista;

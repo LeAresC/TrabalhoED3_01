@@ -2,6 +2,46 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "utils_print.h"
+#include "data_structs.h"
+
+void printIntComNulo(int valor) {
+	// Se o valor for -1, imprime "-", caso contrário imprime o valor
+    if (valor == -1) {
+        printf("-");
+    } else {
+        printf("%d", valor);
+    }
+}
+
+void imprimirSaida(RegistroPessoa *registroAtual)
+{
+    // Verifica se o ponteiro é nulo
+    if (registroAtual == NULL) {
+        return;
+    }
+
+    // Imprime os dados da pessoa segundo as especificações do trabalho
+    printf("Dados da pessoa de codigo %d\n", registroAtual->idPessoa);
+    printf("Nome: %s\n", (registroAtual->tamanhoNomePessoa > 0) ? registroAtual->nomePessoa : "-");
+    printf("Idade: ");
+    printIntComNulo(registroAtual->idadePessoa);
+    printf("\n");
+    printf("Usuario: %s\n", (registroAtual->tamanhoNomeUsuario > 0) ? registroAtual->nomeUsuario : "-");
+    printf("\n");
+}
+
+void erroAbertura()
+{
+    //Imprime o erro de abertura do arquivo
+    printf("Falha no processamento do arquivo.\n");
+}
+
+void erroRegistro()
+{
+    //Imprime o erro de registro
+    printf("Registro inexistente.\n\n");
+}
 
 /*
 Função para imprimir dados salvos no arquivo em binário

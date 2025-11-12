@@ -3,7 +3,6 @@
 #include <string.h>
 #include "data_structs.h"
 #include "ordena_segue.h"
-#include "utils.h"
 #include "io_registro.h"
 #include "io_cabecalho.h"
 #define MAXIMO 500

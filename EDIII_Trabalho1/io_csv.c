@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "io_csv.h"
-#include "utils.h"
+#include "utils_parse.h"
 
 #define CSV_LINHA_MAX 500
 
@@ -124,12 +124,15 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
-        memset(registro->dataInicioQueSegue, '$', 10);
-        registro->dataInicioQueSegue[10] = '\0';
+        memset(registro->dataInicioQueSegue, '$', sizeof(registro->dataInicioQueSegue) - 1);
+        registro->dataInicioQueSegue[sizeof(registro->dataInicioQueSegue) - 1] = '\0';
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
-        strncpy(registro->dataInicioQueSegue, campo, 10);
-        registro->dataInicioQueSegue[10] = '\0';
+        strncpy(registro->dataInicioQueSegue, campo, strlen(campo));
+        for (size_t i = strlen(campo); i < sizeof(registro->dataInicioQueSegue) - 1; i++) {
+            registro->dataInicioQueSegue[i] = '$';
+        }
+        registro->dataInicioQueSegue[sizeof(registro->dataInicioQueSegue) - 1] = '\0';
     }
     free(campo);
 
@@ -137,12 +140,14 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
-        memset(registro->dataFimQueSegue, '$', 10);
-        registro->dataFimQueSegue[10] = '\0';
+        memset(registro->dataFimQueSegue, '$', sizeof(registro->dataFimQueSegue));
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
-        strncpy(registro->dataFimQueSegue, campo, 10);
-        registro->dataFimQueSegue[10] = '\0';
+        strncpy(registro->dataFimQueSegue, campo, strlen(campo));
+        for (size_t i = strlen(campo); i < sizeof(registro->dataFimQueSegue) - 1; i++) {
+            registro->dataFimQueSegue[i] = '$';
+        }
+        registro->dataFimQueSegue[sizeof(registro->dataFimQueSegue) - 1] = '\0';
     }
     free(campo);
 
@@ -159,6 +164,6 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
 
     // Inicializar o campo restante
     registro->removido = '1';
-
+    
     return registro;
 }

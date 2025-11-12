@@ -8,10 +8,10 @@
 #include "criar_tabela_segue.h"
 #include "ordena_segue.h"
 #include "junta_pessoa_segue.h"
-#include "auxiliares_busca.h"
+#include "busca_registro.h"
+#include "lista_registro.h"
+#include "utils_print.h"
 #define MAXIMO 500
-
-void binarioNaTela(char *nomeArquivoBinario);
 
 int main () {
     // Declaração de variáveis
@@ -130,7 +130,7 @@ int main () {
         // Ler os nomes dos arquivos e chamar a função criarTabela
         char ordenado[MAXIMO], pessoa[MAXIMO], indice[MAXIMO];
         int quantidade;
-        scanf("%s %s %s %d", pessoa, ordenado, indice, &quantidade);
+        scanf("%s %s %s %d", pessoa, indice, ordenado, &quantidade);
         // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
         // Retorna 1 se tudo der certo, 0 caso contrário
         resultado = juntaPessoaSegue(pessoa, ordenado, indice, quantidade);

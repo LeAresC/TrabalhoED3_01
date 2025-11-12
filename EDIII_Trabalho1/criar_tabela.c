@@ -3,7 +3,7 @@
 #include <string.h>
 #include "data_structs.h"
 #include "criar_tabela.h"
-#include "utils.h"
+#include "utils_busca.h"
 #include "io_cabecalho.h"
 #include "io_csv.h"
 #include "io_registro.h"

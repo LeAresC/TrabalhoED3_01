@@ -1,21 +1,22 @@
 #include "junta_pessoa_segue.h"
 #include "io_cabecalho.h"
 #include "io_registro.h"
-#include "auxiliares_busca.h"
+#include "utils_parse.h"
+#include "utils_print.h"
+#include "utils_busca.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #define MAXIMO 500
 
-static int compararRegistroSegue(const void *a, const void *b) {
-    // Cast dos ponteiros para o tipo correto
+// Função auxiliar para comparar registros de segue por idPessoaQueESeguida
+static int compararPorIdSeguida(const void *a, const void *b) {
     const RegistroSegue *regA = (const RegistroSegue *)a;
     const RegistroSegue *regB = (const RegistroSegue *)b;
     
-    // Comparar por idPessoaQueSegue
-    if (regA->idPessoaQueSegue < regB->idPessoaQueSegue) return -1;
-    if (regA->idPessoaQueSegue > regB->idPessoaQueSegue) return 1;
+    if (regA->idPessoaQueESeguida < regB->idPessoaQueESeguida) return -1;
+    if (regA->idPessoaQueESeguida > regB->idPessoaQueESeguida) return 1;
     return 0;
 }
 
@@ -86,34 +87,14 @@ static RegistroSegue* buscarRegistrosSegue(RegistroSegue *registroSegue, int idC
         }
     }
     
+    // Ordena os resultados por idPessoaQueESeguida em ordem crescente
+    if (listaResultados != NULL && *segueCount > 0) {
+        qsort(listaResultados, *segueCount, sizeof(RegistroSegue), compararPorIdSeguida);
+    }
+    
     return listaResultados;
 }
 
-static void printIntComNulo(int valor) {
-    // Imprime um inteiro ou '-' se for -1
-    if (valor == -1) {
-        printf("-");
-    } else {
-        printf("%d", valor);
-    }
-}
-
-static void imprimirSaidaPessoaJoin(RegistroPessoa *pessoa) {
-    // Verifica se o ponteiro é nulo
-    if (pessoa == NULL) {
-        return;
-    }
-
-    // Imprime os dados da pessoa
-    printf("Dados da pessoa de codigo %d\n", pessoa->idPessoa);
-    printf("Nome: %s\n", (pessoa->tamanhoNomePessoa > 0) ? pessoa->nomePessoa : "-");
-    printf("Idade: ");
-    printIntComNulo(pessoa->idadePessoa);
-    printf("\n");
-    printf("Usuário: %s\n", (pessoa->tamanhoNomeUsuario > 0) ? pessoa->nomeUsuario : "-");
-    printf("\n");
-
-}
 static void imprimirSaidaSegueJoin(RegistroSegue *segue) {
     // Verifica se o ponteiro é nulo
     if (segue == NULL) {
@@ -231,8 +212,8 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
         for (j = 0; j < matchCountPessoa; j++) {
             // Pega a pessoa atual
             pessoaAtual = matchesPessoa[j];
-            // Imprime os dados da pessoa
-            imprimirSaidaPessoaJoin(pessoaAtual);
+            // Imprime os dados da pessoa usando a função centralizada
+            imprimirSaida(pessoaAtual);
             // Busca os registros de segue associados à pessoa atual
             matchCountSegue = 0;
             matchesSegue = buscarRegistrosSegue(registroSegue, pessoaAtual->idPessoa, quantidadeSegue, &matchCountSegue);
@@ -241,6 +222,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
                 // Imprime os dados do registro de segue
                 imprimirSaidaSegueJoin(&matchesSegue[k]);
             }
+            printf("\n");
             
             // Libera a memória alocada para os registros de segue encontrados
             free(matchesSegue);

@@ -3,7 +3,6 @@
 #include <string.h>
 #include "data_structs.h"
 #include "criar_tabela_segue.h"
-#include "utils.h"
 #include "io_cabecalho.h"
 #include "io_csv.h"
 #include "io_registro.h"
@@ -46,7 +45,7 @@ int criarTabelaSegue(const char *nomeArquivoCsv, const char *nomeArquivoDados) {
 
         // Atualiza a quantidade de pessoas e o próximo byte offset no cabeçalho
         dataHeader.quantidadePessoas++;
-        dataHeader.proxRRN += 30; // Tamanho fixo do registro segue
+        dataHeader.proxRRN++;
 
         // Libera a memória alocada para o registro lido
         free(registro);
