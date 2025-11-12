@@ -124,31 +124,31 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
-        memset(registro->dataInicioQueSegue, '$', sizeof(registro->dataInicioQueSegue) - 1);
-        registro->dataInicioQueSegue[sizeof(registro->dataInicioQueSegue) - 1] = '\0';
+        memset(registro->dataInicioQueSegue, '$', 10);
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
         strncpy(registro->dataInicioQueSegue, campo, strlen(campo));
-        for (size_t i = strlen(campo); i < sizeof(registro->dataInicioQueSegue) - 1; i++) {
+        for (size_t i = strlen(campo); i < 10; i++) {
             registro->dataInicioQueSegue[i] = '$';
         }
-        registro->dataInicioQueSegue[sizeof(registro->dataInicioQueSegue) - 1] = '\0';
     }
+    registro->dataInicioQueSegue[10] = '\0';
     free(campo);
 
     // Campo dataFimQueSegue, pode ser nulo
     campo = obterProximoCampo(&linha_ptr);
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
-        memset(registro->dataFimQueSegue, '$', sizeof(registro->dataFimQueSegue));
+        memset(registro->dataFimQueSegue, '$', 10);
+        
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
         strncpy(registro->dataFimQueSegue, campo, strlen(campo));
-        for (size_t i = strlen(campo); i < sizeof(registro->dataFimQueSegue) - 1; i++) {
+        for (size_t i = strlen(campo); i < 10; i++) {
             registro->dataFimQueSegue[i] = '$';
         }
-        registro->dataFimQueSegue[sizeof(registro->dataFimQueSegue) - 1] = '\0';
     }
+    registro->dataFimQueSegue[10] = '\0';
     free(campo);
 
     // Campo grauAmizade, pode ser nulo
@@ -163,7 +163,7 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     free(campo);
 
     // Inicializar o campo restante
-    registro->removido = '1';
+    registro->removido = '0';
     
     return registro;
 }

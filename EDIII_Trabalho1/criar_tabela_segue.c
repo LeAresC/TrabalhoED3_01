@@ -29,7 +29,7 @@ int criarTabelaSegue(const char *nomeArquivoCsv, const char *nomeArquivoDados) {
     // Inicializar e escrever os cabeçalhos dos arquivos binários
     // Cabeçalho do arquivo de dados
     dataHeader.quantidadePessoas = 0;
-    dataHeader.proxRRN = 9;
+    dataHeader.proxRRN = 0;
     escreveCabecalhoSegue(arquivoDados, '0', dataHeader.quantidadePessoas, dataHeader.proxRRN);
 
     // Pular o cabeçalho do CSV
