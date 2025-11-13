@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "io_csv.h"
+#include "utilidades.h"
 #include "utils.h"
 
 #define CSV_LINHA_MAX 500
@@ -125,12 +126,14 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
         memset(registro->dataInicioQueSegue, '$', 10);
-        registro->dataInicioQueSegue[10] = '\0';
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
-        strncpy(registro->dataInicioQueSegue, campo, 10);
-        registro->dataInicioQueSegue[10] = '\0';
+        strncpy(registro->dataInicioQueSegue, campo, strlen(campo));
+        for (size_t i = strlen(campo); i < 10; i++) {
+            registro->dataInicioQueSegue[i] = '$';
+        }
     }
+    registro->dataInicioQueSegue[10] = '\0';
     free(campo);
 
     // Campo dataFimQueSegue, pode ser nulo
@@ -138,12 +141,15 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     if (campo == NULL || strlen(campo) == 0) {
         // Campo nulo ou vazio - campo fixo, preencher com '$'
         memset(registro->dataFimQueSegue, '$', 10);
-        registro->dataFimQueSegue[10] = '\0';
+        
     } else {
         // Campo não nulo - campo fixo, copia o conteúdo
-        strncpy(registro->dataFimQueSegue, campo, 10);
-        registro->dataFimQueSegue[10] = '\0';
+        strncpy(registro->dataFimQueSegue, campo, strlen(campo));
+        for (size_t i = strlen(campo); i < 10; i++) {
+            registro->dataFimQueSegue[i] = '$';
+        }
     }
+    registro->dataFimQueSegue[10] = '\0';
     free(campo);
 
     // Campo grauAmizade, pode ser nulo
@@ -158,7 +164,7 @@ RegistroSegue* leRegistroSegueCsv(FILE *arquivoCsv) {
     free(campo);
 
     // Inicializar o campo restante
-    registro->removido = '1';
-
+    registro->removido = '0';
+    
     return registro;
 }

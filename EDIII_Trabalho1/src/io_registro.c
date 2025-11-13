@@ -22,12 +22,12 @@ void escreveRegistroPessoa(FILE *arquivo, RegistroPessoa *registro) {
 
 // Escreve um registro de segue no arquivo binário
 void escreveRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
-    fwrite(&registro->removido, sizeof(registro->removido), 1, arquivo);
-    fwrite(&registro->idPessoaQueSegue, sizeof(registro->idPessoaQueSegue), 1, arquivo);
-    fwrite(&registro->idPessoaQueESeguida, sizeof(registro->idPessoaQueESeguida), 1, arquivo);
-    fwrite(registro->dataInicioQueSegue, 10, 1, arquivo);  // Escreve exatamente 10 bytes
-    fwrite(registro->dataFimQueSegue, 10, 1, arquivo);     // Escreve exatamente 10 bytes
-    fwrite(&registro->grauAmizade, sizeof(registro->grauAmizade), 1, arquivo);
+    fwrite(&registro->removido, sizeof(char), 1, arquivo);
+    fwrite(&registro->idPessoaQueSegue, sizeof(int), 1, arquivo);
+    fwrite(&registro->idPessoaQueESeguida, sizeof(int), 1, arquivo);
+    fwrite(registro->dataInicioQueSegue, sizeof(char), 10, arquivo); // Escreve exatamente 10 bytes
+    fwrite(registro->dataFimQueSegue, sizeof(char), 10, arquivo); // Escreve exatamente 10 bytes
+    fwrite(&registro->grauAmizade, sizeof(char), 1, arquivo);
 }
 
 // Escreve um registro de índice no arquivo binário
@@ -35,8 +35,10 @@ void escreveRegistroIndice(FILE *arquivo, RegistroIndice *registro) {
     fwrite(&registro->idPessoa, sizeof(registro->idPessoa), 1, arquivo);
     fwrite(&registro->byteOffset, sizeof(registro->byteOffset), 1, arquivo);
 }
+
 // Lê um registro de segue do arquivo binário
 void leRegistroSegue(FILE *arquivo, RegistroSegue *registro) {
+
     fread(&registro->removido, sizeof(registro->removido), 1, arquivo);
     fread(&registro->idPessoaQueSegue, sizeof(registro->idPessoaQueSegue), 1, arquivo);
     fread(&registro->idPessoaQueESeguida, sizeof(registro->idPessoaQueESeguida), 1, arquivo);

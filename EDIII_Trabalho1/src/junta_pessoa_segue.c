@@ -2,18 +2,198 @@
 #include "io_cabecalho.h"
 #include "io_registro.h"
 #include "auxiliares_busca.h"
+#include "utilidades.h"
+#include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #define MAXIMO 500
 
-static int compararRegistroSegue(const void *a, const void *b) {
-    // Cast dos ponteiros para o tipo correto
+static RegistroPessoa *leregistroPessoa(FILE *arq)
+{
+    // Le e o status do arquivo e seu tamanho e guarda os resultados em um buffer
+    char buffer1;
+    int buffer2;
+    size_t result;
+    result = fread(&buffer1, sizeof(char), 1, arq);
+    if (result == 0) {
+        return NULL;
+    }
+    result = fread(&buffer2, sizeof(int), 1, arq);
+
+    // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
+    RegistroPessoa *registroAtual = (RegistroPessoa*) malloc(sizeof(RegistroPessoa));
+    registroAtual->removido = buffer1;
+    registroAtual->tamanhoRegistro = buffer2;
+
+    // So o registro atual foi removido, pula o resto do registro e retorna
+    if (registroAtual->removido == '1')
+    {
+        // Pula o restante do registro (tamanhoRegistro - 5 bytes já lidos: 1 char + 1 int)
+        fseek(arq, registroAtual->tamanhoRegistro - 5, SEEK_CUR);
+        return registroAtual;
+    }
+
+    // Lê id idade e tamanhoNome
+    fread(&registroAtual->idPessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->idadePessoa, sizeof(int), 1, arq);
+    fread(&registroAtual->tamanhoNomePessoa, sizeof(int), 1, arq);
+
+    if (registroAtual->tamanhoNomePessoa > 0) {
+        // Aloca espaço para o nome = tamanhoNome + (1byte) do \0
+        registroAtual->nomePessoa = malloc((registroAtual->tamanhoNomePessoa + 1));
+        fread(registroAtual->nomePessoa, registroAtual->tamanhoNomePessoa, 1, arq);
+        registroAtual->nomePessoa[registroAtual->tamanhoNomePessoa] = '\0';
+    } else {
+        // Aloca espaço mínimo para o nome
+        registroAtual->nomePessoa = malloc(1);
+        registroAtual->nomePessoa[0] = '\0';
+    }
+
+    fread(&registroAtual->tamanhoNomeUsuario, sizeof(int), 1, arq);
+    if(registroAtual->tamanhoNomeUsuario > 0) {
+        registroAtual->nomeUsuario = malloc((registroAtual->tamanhoNomeUsuario + 1));
+        fread(registroAtual->nomeUsuario, registroAtual->tamanhoNomeUsuario, 1, arq);
+        registroAtual->nomeUsuario[registroAtual->tamanhoNomeUsuario] = '\0';
+    } else {
+        // Aloca espaço mínimo para o nome de usuário
+        registroAtual->nomeUsuario = malloc(1);
+        registroAtual->nomeUsuario[0] = '\0';
+    }
+    // Retorna o registro atual
+    return registroAtual;
+}
+
+
+
+static RegistroPessoa** buscaPessoas(FILE *arquivoPessoa, RegistroIndice *registroIndice, int quantidadeIndices, char *nomeCampo, char *valorCampo, int *counter) {    
+    // Declara variáveis
+    RegistroPessoa** lista;
+    RegistroPessoa* registro;
+    int capacidade, match, valorId;
+    long byteOffset;
+    RegistroIndice chaveBusca;
+
+    // Inicializa o contador de registros encontrados
+    *counter = 0;
+    lista = NULL;
+
+    // Se a busca for por idPessoa, usa busca binária no índice
+    if (strcmp(nomeCampo, "idPessoa") == 0) {
+        
+        // Constrói a chave de busca
+        valorId = atoi(valorCampo);
+        chaveBusca.idPessoa = valorId;
+
+        // Realiza a busca binária no índice
+        RegistroIndice *resultado = (RegistroIndice*) bsearch(&chaveBusca, registroIndice, quantidadeIndices, sizeof(RegistroIndice), compararRegistrosIndice);
+
+        // Se não encontrar, retorna NULL
+        if (resultado == NULL) {
+            return NULL; 
+        }
+
+        // Se encontrar, lê o registro correspondente no arquivo de pessoas
+        byteOffset = resultado->byteOffset;
+        fseek(arquivoPessoa, byteOffset, SEEK_SET);
+        registro = leregistroPessoa(arquivoPessoa); 
+
+        // Se o registro for nulo ou removido, libera e retorna NULL
+        if (registro == NULL || registro->removido == '1') {
+            if (registro) liberaRegistroPessoa(registro);
+            return NULL;
+        }
+
+        // Caso contrário, adiciona o registro à lista e retorna
+        lista = (RegistroPessoa**) malloc(sizeof(RegistroPessoa*));
+        lista[0] = registro;
+        *counter = 1;
+        return lista;
+
+    } else {
+        // Busca sequencial para os outros campos
+        fseek(arquivoPessoa, 17, SEEK_SET);
+        capacidade = 0;
+
+        // Percorre todo o arquivo de pessoas
+        while ((registro = leregistroPessoa(arquivoPessoa)) != NULL) {
+            // Se estiver removido, libera e continua
+            if (registro->removido == '1') {
+                liberaRegistroPessoa(registro);
+                continue;
+            }
+
+            // Verifica se o registro atual corresponde ao critério de busca
+            match = 0;
+            if (strcmp(nomeCampo, "idadePessoa") == 0) {
+                if (registro->idadePessoa == atoi(valorCampo)) match = 1;
+            } else if (strcmp(nomeCampo, "nomePessoa") == 0) {
+                if (registro->tamanhoNomePessoa > 0 && strcmp(registro->nomePessoa, valorCampo) == 0) match = 1;
+            } else if (strcmp(nomeCampo, "nomeUsuario") == 0) { 
+                if (registro->tamanhoNomeUsuario > 0 && strcmp(registro->nomeUsuario, valorCampo) == 0) match = 1;
+            }
+
+            // Se o registro bate com o critério, adiciona à lista
+            if (match) {
+                // Verifica se precisa aumentar a capacidade da lista
+                if (*counter == capacidade) {
+                    // Se capacidade for 0, inicializa com 8, senão dobra
+                    capacidade = (capacidade == 0) ? 8 : capacidade * 2;
+                    lista = (RegistroPessoa**) realloc(lista, capacidade * sizeof(RegistroPessoa*));
+                }
+                // Adiciona o registro à lista e incrementa o contador
+                lista[*counter] = registro;
+                (*counter)++;
+            } else {
+                // Se não bate, libera o registro
+                liberaRegistroPessoa(registro);
+            }
+        }
+        // Retorna a lista de registros encontrados
+        return lista;
+    }
+}
+
+static void leCriterioBusca(char *nomeCampo, char *valorCampo) {
+    int lixo;
+    char buffer[2];
+
+    // Lê o critério de busca no formato "campo=valor"
+    scanf("%d %[^=]", &lixo, nomeCampo);
+    if (strcmp(nomeCampo, "idPessoa") == 0 || strcmp(nomeCampo, "idadePessoa") == 0) {
+        // É um int. Consome o '=' e lê o valor como string.
+        scanf("%1s%s", buffer, valorCampo);
+    } else {
+        // É uma string. Consome o '=' e chama scanQuoteString.
+        scanf("%1s", buffer);
+        scanQuoteString(valorCampo);
+    }
+}
+
+// Função auxiliar para imprimir inteiro com tratamento de nulo
+static void printIntComNulo(int valor) {
+    if (valor == -1) {
+        printf("-");
+    } else {
+        printf("%d", valor);
+    }
+}
+
+// Função auxiliar para comparar registros de segue por idPessoaQueESeguida
+static int compararPorIdSeguida(const void *a, const void *b) {
     const RegistroSegue *regA = (const RegistroSegue *)a;
     const RegistroSegue *regB = (const RegistroSegue *)b;
     
-    // Comparar por idPessoaQueSegue
+    if (regA->idPessoaQueESeguida < regB->idPessoaQueESeguida) return -1;
+    if (regA->idPessoaQueESeguida > regB->idPessoaQueESeguida) return 1;
+    return 0;
+}
+
+static int compararRegistroSegue(const void *a, const void *b) {
+    const RegistroSegue *regA = (const RegistroSegue *)a;
+    const RegistroSegue *regB = (const RegistroSegue *)b;
+    
     if (regA->idPessoaQueSegue < regB->idPessoaQueSegue) return -1;
     if (regA->idPessoaQueSegue > regB->idPessoaQueSegue) return 1;
     return 0;
@@ -86,34 +266,14 @@ static RegistroSegue* buscarRegistrosSegue(RegistroSegue *registroSegue, int idC
         }
     }
     
+    // Ordena os resultados por idPessoaQueESeguida em ordem crescente
+    if (listaResultados != NULL && *segueCount > 0) {
+        qsort(listaResultados, *segueCount, sizeof(RegistroSegue), compararPorIdSeguida);
+    }
+    
     return listaResultados;
 }
 
-static void printIntComNulo(int valor) {
-    // Imprime um inteiro ou '-' se for -1
-    if (valor == -1) {
-        printf("-");
-    } else {
-        printf("%d", valor);
-    }
-}
-
-static void imprimirSaidaPessoaJoin(RegistroPessoa *pessoa) {
-    // Verifica se o ponteiro é nulo
-    if (pessoa == NULL) {
-        return;
-    }
-
-    // Imprime os dados da pessoa
-    printf("Dados da pessoa de codigo %d\n", pessoa->idPessoa);
-    printf("Nome: %s\n", (pessoa->tamanhoNomePessoa > 0) ? pessoa->nomePessoa : "-");
-    printf("Idade: ");
-    printIntComNulo(pessoa->idadePessoa);
-    printf("\n");
-    printf("Usuário: %s\n", (pessoa->tamanhoNomeUsuario > 0) ? pessoa->nomeUsuario : "-");
-    printf("\n");
-
-}
 static void imprimirSaidaSegueJoin(RegistroSegue *segue) {
     // Verifica se o ponteiro é nulo
     if (segue == NULL) {
@@ -215,8 +375,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
     // Loop para processar os critérios de busca
     for (i = 0; i < n; i++) {
         // Lê o critério de busca
-        int cnt; scanf("%d", &cnt);
-        leInput(nomeCampo, valorCampo);
+        leCriterioBusca(nomeCampo, valorCampo);
 
         // Busca as pessoas que atendem ao critério
         matchCountPessoa = 0;
@@ -232,8 +391,8 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
         for (j = 0; j < matchCountPessoa; j++) {
             // Pega a pessoa atual
             pessoaAtual = matchesPessoa[j];
-            // Imprime os dados da pessoa
-            imprimirSaidaPessoaJoin(pessoaAtual);
+            // Imprime os dados da pessoa usando a função centralizada
+            imprimirSaida(pessoaAtual);
             // Busca os registros de segue associados à pessoa atual
             matchCountSegue = 0;
             matchesSegue = buscarRegistrosSegue(registroSegue, pessoaAtual->idPessoa, quantidadeSegue, &matchCountSegue);
@@ -242,6 +401,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
                 // Imprime os dados do registro de segue
                 imprimirSaidaSegueJoin(&matchesSegue[k]);
             }
+            printf("\n");
             
             // Libera a memória alocada para os registros de segue encontrados
             free(matchesSegue);
@@ -256,6 +416,7 @@ int juntaPessoaSegue(const char *nomeArquivoPessoa, const char *nomeArquivoSegue
     
     // Libera memória e fecha arquivo
     fclose(arquivoPessoa);
+    free(cabecalhoPessoa);
     free(registroIndice);
     free(registroSegue);
     

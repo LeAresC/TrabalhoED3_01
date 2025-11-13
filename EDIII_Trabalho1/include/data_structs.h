@@ -36,13 +36,12 @@ typedef struct {
 } CabecalhoSegue;
 
 typedef struct {
-    char removido; // 1 byte: '1' ativo, '0' removido
+    char removido; // 1 byte: '0' ativo, '1' removido
     int idPessoaQueSegue; // 4 bytes
     int idPessoaQueESeguida; // 4 bytes
-    char dataInicioQueSegue[11]; // 11 bytes (10 para "DD/MM/AAAA" + 1 para '\0')
-    char dataFimQueSegue[11]; // 11 bytes (10 para "DD/MM/AAAA" + 1 para '\0')
-    char grauAmizade; // 1 byte ('0' a '2')
+    char dataInicioQueSegue[11]; // 11 bytes (10 para "DD/MM/AAAA")
+    char dataFimQueSegue[11]; // 11 bytes (10 para "DD/MM/AAAA")
+    char grauAmizade; // 1 byte ('0' a '2' ou '$' para nulo)
 } RegistroSegue;
 
 #endif // DATA_STRUCTS_H
-

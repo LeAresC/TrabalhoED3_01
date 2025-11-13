@@ -190,7 +190,7 @@ int main()
         // Ler os nomes dos arquivos e chamar a função criarTabela
         char ordenado[MAXIMO], pessoa[MAXIMO], indice[MAXIMO];
         int quantidade;
-        scanf("%s %s %s %d", pessoa, ordenado, indice, &quantidade);
+        scanf("%s %s %s %d", pessoa, indice, ordenado, &quantidade);
         // Chama a função para criar a tabela e somente imprime o binário na tela se der certo
         // Retorna 1 se tudo der certo, 0 caso contrário
         resultado = juntaPessoaSegue(pessoa, ordenado, indice, quantidade);

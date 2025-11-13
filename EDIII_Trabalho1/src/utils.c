@@ -3,6 +3,7 @@
 #include <string.h>
 #include "data_structs.h"
 
+
 char* obterProximoCampo(char **linha) {
     //Declaração de variáveis
     char *inicio, *p, *campo;
