@@ -1,0 +1,1 @@
+int buscaAmizades(char *arqPessoa, char *arqIndex, char *arqSegue);

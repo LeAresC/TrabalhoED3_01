@@ -11,6 +11,7 @@
 #include "funcionalidade_5.h"
 #include "funcionalidade_6.h"
 #include "funcionalidade_7.h"
+#include "funcionalidade_11.h"
 #include "utilidades.h"
 #include "ordena_segue.h"
 #include "criar_tabela_segue.h"
@@ -197,6 +198,16 @@ int main()
         if (resultado == 0)
         {
             // Falha na criação da tabela, imprime como definido
+            erroAbertura();
+        }
+    }
+    if(funcionalidade == 11)
+    {
+        char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO];
+        scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
+        resultado = buscaAmizades(arqPessoa, arqIndex, arqSegue);
+        if (resultado == 0)
+        {
             erroAbertura();
         }
     }
