@@ -55,7 +55,7 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
 
             // Variáveis auxiliares
             int idAnterior = RegistroAtual->idPessoa;
-            int OffsetdeAtualização = Offsets[j];
+            int OffsetdeAtualizacao = Offsets[j];
             int tamanhoAnterior = RegistroAtual->tamanhoRegistro;
             int tamanhoNec = RegistroAtual->tamanhoRegistro;
 
@@ -98,16 +98,16 @@ int atualizaArquivos(char *arquivoDados, char *arquivoIndice, int N)
                 RegistroAtual->tamanhoRegistro = tamanhoNec;
 
                 // Atualiza o offset de inserção 
-                OffsetdeAtualização = CabecalhoP->proxByteOffset;
+                OffsetdeAtualizacao = CabecalhoP->proxByteOffset;
 
                 // Atualiza o cabecalho em RAM
                 CabecalhoP->quantidadeRemovidos++;
                 CabecalhoP->proxByteOffset += 5 + RegistroAtual->tamanhoRegistro;
             }
             // Atualiza o arquivo pessoa
-            inserePessoa(arqD, OffsetdeAtualização, RegistroAtual);
+            inserePessoa(arqD, OffsetdeAtualizacao, RegistroAtual);
             // Atualiza o indice em RAM mantendo a ordenação
-            atualizaNoIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa, OffsetdeAtualização, idAnterior);
+            atualizaNoIndice(DadosIndice, tamanhoIndice, RegistroAtual->idPessoa, OffsetdeAtualizacao, idAnterior);
 
             // Libera a memória
             free(RegistroAtual->nomePessoa);

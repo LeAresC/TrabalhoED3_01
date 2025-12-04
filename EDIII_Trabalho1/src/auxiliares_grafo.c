@@ -22,7 +22,7 @@ void imprimeListaAdjacencia(Adjacentes *ListaAdjacencia, int qtdPessoas)
             printf("%s, " ,ListaAdjacencia[i].encadeadas[j].dataFimQueSegue);
             else printf("NULO, ");
             if(ListaAdjacencia[i].encadeadas[j].grauAmizade != '-')
-            printf("%s" ,ListaAdjacencia[i].encadeadas[j].grauAmizade);
+            printf("%c" ,ListaAdjacencia[i].encadeadas[j].grauAmizade);
             else printf("NULO");
             printf("\n");
         }
@@ -31,7 +31,7 @@ void imprimeListaAdjacencia(Adjacentes *ListaAdjacencia, int qtdPessoas)
 }
 
 
-static int OrdenaAdjacencia(const void *a, const void *b)
+int OrdenaAdjacencia(const void *a, const void *b)
 {
     // 1. Cast para Adjacentes (porque estamos ordenando o array principal)
     const Adjacentes *adjA = (const Adjacentes *)a;
@@ -76,7 +76,7 @@ void InsereAdjacencia(FILE *arqP, FILE *arqS, int Map[], Adjacentes *listaAdjace
     {
         RegistroSegue RegAtualS;
         leRegistroSegue(arqS, &RegAtualS);
-        if(RegAtualS.removido = '1') 
+        if(RegAtualS.removido == '1') 
         {
             fseek(arqS, SEEK_CUR, 29);
             continue;
@@ -98,11 +98,11 @@ void InsereAdjacencia(FILE *arqP, FILE *arqS, int Map[], Adjacentes *listaAdjace
         fseek(arqP, SEEK_SET, Offset);
         RegAtualP = leRegistroPessoa(arqP); 
         NoAtual.nomeUsuarioQueESeguida = malloc(MAXIMO);
-        strcpy(NoAtual.nomeUsuarioQueESeguida, RegAtualS.idPessoaQueESeguida);
+        strcpy(NoAtual.nomeUsuarioQueESeguida, RegAtualP->nomePessoa);
 
         strcpy(NoAtual.dataInicioQueSegue,RegAtualS.dataInicioQueSegue);
 
-        strpcy(NoAtual.dataFimQueSegue, RegAtualS.dataFimQueSegue);
+        strcpy(NoAtual.dataFimQueSegue, RegAtualS.dataFimQueSegue);
 
         NoAtual.grauAmizade = RegAtualS.grauAmizade;
 
