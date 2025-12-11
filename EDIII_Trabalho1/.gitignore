@@ -1,0 +1,6 @@
+# Ignore compiled object files
+*.o
+src/*.o
+
+# Ignore program binary
+programTrab
