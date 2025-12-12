@@ -12,6 +12,7 @@
 #include "funcionalidade_6.h"
 #include "funcionalidade_7.h"
 #include "funcionalidade_11.h"
+#include "funcionalidade_12.h"
 #include "utilidades.h"
 #include "ordena_segue.h"
 #include "criar_tabela_segue.h"
@@ -206,6 +207,16 @@ int main()
         char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO];
         scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
         resultado = buscaAmizades(arqPessoa, arqIndex, arqSegue);
+        if (resultado == 0)
+        {
+            erroAbertura();
+        }
+    }
+    if(funcionalidade == 12)
+    {
+        char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO];
+        scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
+        resultado = buscaAmizadesTransposto(arqPessoa, arqIndex, arqSegue);
         if (resultado == 0)
         {
             erroAbertura();
