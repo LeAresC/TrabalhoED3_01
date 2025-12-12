@@ -8,22 +8,26 @@
 #include "utilidades.h"
 #define MAXIMO 2000
 
-void liberaRegistroIndice(RegistroIndice **DadosIndice, int qtdPessoas){
+void liberaRegistroIndice(RegistroIndice **DadosIndice, int qtdPessoas)
+{
     for (int i = 0; i < qtdPessoas; i++)
     {
         free(DadosIndice[i]);
     }
     free(DadosIndice);
 }
-void liberaListaAdjacencia(Adjacentes *ListaAdjacencia, int qtdPessoas)
+void liberaListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
 {
-    for(int i = 0; i < qtdPessoas; i++){
-        int qtdSegue = ListaAdjacencia[i].quantidadeLigadas;
-        for(int j = 0; j < qtdSegue; j++){
-            free(ListaAdjacencia[i].encadeadas[j].nomeUsuarioQueSegue);
-            free(ListaAdjacencia[i].encadeadas[j].nomeUsuarioQueESeguida);
+    for (int i = 0; i < qtdPessoas; i++)
+    {
+        int qtdSegue = ListaAdjacencia[i].tamanho;
+        No *at = ListaAdjacencia[i].inicio;
+        for (int j = 0; j < qtdSegue; j++)
+        {
+            No *prox = at->prox;
+            free(at); 
+            at = prox; 
         }
-        free(ListaAdjacencia[i].encadeadas);
     }
     free(ListaAdjacencia);
 }
@@ -48,7 +52,7 @@ int buscaAmizades(char *arqPessoa, char *arqIndex, char *arqSegue)
     RegistroIndice **DadosIndice = leArquivoIndice(arquivoIndice, CabecalhoP->quantidadePessoas);
 
     // Cria a lista de adjacência na RAM
-    Adjacentes *ListaAdjacencia = criaListaAdjacencia(arquivoPessoa, arquivoSegue, DadosIndice, CabecalhoP->quantidadePessoas, CabecalhoS.quantidadePessoas);
+    Lista *ListaAdjacencia = criaListaAdjacencia(arquivoPessoa, arquivoSegue, DadosIndice, CabecalhoP->quantidadePessoas, CabecalhoS.quantidadePessoas);
 
     // Imprime a lista de adjacência
     imprimeListaAdjacencia(ListaAdjacencia, CabecalhoP->quantidadePessoas);

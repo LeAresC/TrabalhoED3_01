@@ -8,67 +8,31 @@
 #include "io_registro.h"
 #define MAXIMO 2000
 
-void imprimeListaAdjacencia(Adjacentes *ListaAdjacencia, int qtdPessoas)
+void imprimeListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
 {
     for(int i = 0; i < qtdPessoas; i++){
-        int qtdSegue = ListaAdjacencia[i].quantidadeLigadas;
+        int qtdSegue = ListaAdjacencia[i].tamanho;
+        No *at = ListaAdjacencia[i].inicio;
         for(int j = 0; j < qtdSegue; j++){
-            printf("%s, " ,ListaAdjacencia[i].encadeadas[j].nomeUsuarioQueSegue);
-            printf("%s, " ,ListaAdjacencia[i].encadeadas[j].nomeUsuarioQueESeguida);
-            if(strcmp(ListaAdjacencia[i].encadeadas[j].dataInicioQueSegue, "-") != 0)
-            printf("%s, " ,ListaAdjacencia[i].encadeadas[j].dataInicioQueSegue);
+            printf("%s, " ,at->nomeUsuarioQueSegue);
+            printf("%s, " ,at->nomeUsuarioQueESeguida);
+            if(strcmp(at->dataInicioQueSegue, "-") != 0)
+            printf("%s, " ,at->dataInicioQueSegue);
             else printf("NULO, ");
-            if(strcmp(ListaAdjacencia[i].encadeadas[j].dataFimQueSegue, "-") != 0)
-            printf("%s, " ,ListaAdjacencia[i].encadeadas[j].dataFimQueSegue);
+            if(strcmp(at->dataFimQueSegue, "-") != 0)
+            printf("%s, " ,at->dataFimQueSegue);
             else printf("NULO, ");
-            if(ListaAdjacencia[i].encadeadas[j].grauAmizade != '-')
-            printf("%c" ,ListaAdjacencia[i].encadeadas[j].grauAmizade);
+            if(at->grauAmizade != '-')
+            printf("%c" ,at->grauAmizade);
             else printf("NULO");
             printf("\n");
+            at = at->prox;
         }
         printf("\n");
     }
 }
 
-
-int OrdenaAdjacencia(const void *a, const void *b)
-{
-    // 1. Cast para Adjacentes (porque estamos ordenando o array principal)
-    const Adjacentes *adjA = (const Adjacentes *)a;
-    const Adjacentes *adjB = (const Adjacentes *)b;
-
-    // SEGURANÇA: Verificar se existem nós encadeados.
-    // Se a lista estiver vazia, não temos nome para comparar.
-    // Tratamento simples: vazios vão para o final.
-    if (adjA->quantidadeLigadas == 0 && adjB->quantidadeLigadas == 0) return 0;
-    if (adjA->quantidadeLigadas == 0) return 1; 
-    if (adjB->quantidadeLigadas == 0) return -1;
-
-    // 2. Acessar os dados do PRIMEIRO nó da lista para usar como referência
-    const No *noA = &adjA->encadeadas[0];
-    const No *noB = &adjB->encadeadas[0];
-
-    // 3. Critério Principal: Nome (Ordem alfabética)
-    int comparacaoNome = strcmp(noA->nomeUsuarioQueSegue, noB->nomeUsuarioQueSegue);
-
-    if (comparacaoNome != 0) {
-        return comparacaoNome;
-    }
-
-    // 4. Critério de Desempate: Data
-    int diaA, mesA, anoA;
-    int diaB, mesB, anoB;
-
-    sscanf(noA->dataInicioQueSegue, "%d/%d/%d", &diaA, &mesA, &anoA);
-    sscanf(noB->dataInicioQueSegue, "%d/%d/%d", &diaB, &mesB, &anoB);
-
-    if (anoA != anoB) return anoA - anoB;
-    if (mesA != mesB) return mesA - mesB;
-    return diaA - diaB;
-}
-
-
-void InsereAdjacencia(FILE *arqP, FILE *arqS, int Map[], Adjacentes *listaAdjacencia, int qtdSegues, int qtdPessoas, RegistroIndice **DadosIndice)
+void InsereAdjacencia(FILE *arqP, FILE *arqS, int Map[], Lista* ListaDeAdjacencia, int qtdSegues, int qtdPessoas, RegistroIndice **DadosIndice)
 {
     fseek(arqS, SEEK_SET, 9);
     int Contador = 0;
@@ -84,38 +48,45 @@ void InsereAdjacencia(FILE *arqP, FILE *arqS, int Map[], Adjacentes *listaAdjace
 
 
         int Indice = Map[RegAtualS.idPessoaQueSegue];
-        int TamanhoAtual = listaAdjacencia[Indice].quantidadeLigadas;
-
-        No NoAtual = listaAdjacencia[Indice].encadeadas[TamanhoAtual];
+        int TamanhoAtual = ListaDeAdjacencia[Indice].tamanho;
+        No* NoAtual = (No *)malloc(sizeof(No));
+        if(TamanhoAtual == 0)
+        {
+            ListaDeAdjacencia[Indice].inicio = NoAtual;
+        }
+        else
+        {
+            ListaDeAdjacencia[Indice].fim->prox = NoAtual;
+        }
+        ListaDeAdjacencia[Indice].fim = NoAtual;
 
         long Offset = buscaBinariaIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueSegue);
         fseek(arqP, SEEK_SET, Offset);
         RegistroPessoa *RegAtualP = leRegistroPessoa(arqP);
-        NoAtual.nomeUsuarioQueSegue = malloc(MAXIMO);
-        strcpy(NoAtual.nomeUsuarioQueSegue,RegAtualP->nomePessoa);
+        NoAtual->nomeUsuarioQueSegue = malloc(MAXIMO);
+        strcpy(NoAtual->nomeUsuarioQueSegue,RegAtualP->nomePessoa);
 
         Offset = buscaBinariaIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueESeguida);
         fseek(arqP, SEEK_SET, Offset);
         RegAtualP = leRegistroPessoa(arqP); 
-        NoAtual.nomeUsuarioQueESeguida = malloc(MAXIMO);
-        strcpy(NoAtual.nomeUsuarioQueESeguida, RegAtualP->nomePessoa);
+        NoAtual->nomeUsuarioQueESeguida = malloc(MAXIMO);
+        strcpy(NoAtual->nomeUsuarioQueESeguida, RegAtualP->nomePessoa);
 
-        strcpy(NoAtual.dataInicioQueSegue,RegAtualS.dataInicioQueSegue);
+        strcpy(NoAtual->dataInicioQueSegue,RegAtualS.dataInicioQueSegue);
 
-        strcpy(NoAtual.dataFimQueSegue, RegAtualS.dataFimQueSegue);
+        strcpy(NoAtual->dataFimQueSegue, RegAtualS.dataFimQueSegue);
 
-        NoAtual.grauAmizade = RegAtualS.grauAmizade;
+        NoAtual->grauAmizade = RegAtualS.grauAmizade;
+        NoAtual->prox == NULL;
 
-        listaAdjacencia[Indice].encadeadas[TamanhoAtual] = NoAtual;
-        listaAdjacencia[Indice].quantidadeLigadas++;
-
+        ListaDeAdjacencia[Indice].tamanho++;
         Contador++;
     }
 }
 
-Adjacentes *criaListaAdjacencia(FILE *arqP, FILE *arqS, RegistroIndice **DadosIndice, int qtdPessoas, int qtdSegues)
+Lista* criaListaAdjacencia(FILE *arqP, FILE *arqS, RegistroIndice **DadosIndice, int qtdPessoas, int qtdSegues)
 {
-    Adjacentes *ListaAdjacencia = (Adjacentes *)malloc(qtdPessoas * sizeof(Adjacentes));
+   Lista* ListaDeAdjacencia = (Lista *) malloc(sizeof(Lista) * qtdPessoas);
 
     int Map[MAXIMO];
     memset(Map, -1, sizeof(Map));
@@ -123,11 +94,8 @@ Adjacentes *criaListaAdjacencia(FILE *arqP, FILE *arqS, RegistroIndice **DadosIn
     for (int i = 0; i < qtdPessoas; i++)
     {
         Map[DadosIndice[i]->idPessoa] = i;
-
-        ListaAdjacencia[i].quantidadeLigadas = 0;
-        ListaAdjacencia[i].encadeadas = (No *)malloc(qtdSegues * sizeof(No));
+        ListaDeAdjacencia[i].tamanho = 0;
     }
-    InsereAdjacencia(arqP, arqS, Map, ListaAdjacencia, qtdSegues, qtdPessoas, DadosIndice);
-    qsort(ListaAdjacencia, qtdPessoas, sizeof(Adjacentes), OrdenaAdjacencia);
-    return ListaAdjacencia;
+    InsereAdjacencia(arqP, arqS, Map, ListaDeAdjacencia, qtdSegues, qtdPessoas, DadosIndice);
+    return ListaDeAdjacencia;
 }
