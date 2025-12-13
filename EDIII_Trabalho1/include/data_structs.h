@@ -14,6 +14,7 @@ typedef struct {
     int tamanho;
     No *fim;
     No *inicio;
+    char *nomeDono; // Nome do dono desta lista (vértice do grafo)
 }Lista;
 
 typedef struct {

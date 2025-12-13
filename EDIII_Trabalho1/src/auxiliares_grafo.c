@@ -313,3 +313,29 @@ Lista *criaListaAdjacencia(int Tipo, FILE *arqP, FILE *arqS, RegistroIndice *Dad
     InsereAdjacencia(arqP, arqS, Map, ListaDeAdjacencia, qtdSegues, qtdPessoas, DadosIndice);
     return ListaDeAdjacencia;
 }
+
+void preencherNomesDono(Lista *grafo, int qtdPessoas, RegistroIndice *dadosIndice, FILE *arqPessoa) {
+    int i;
+    long offset;
+    char nomeTemp[100];
+    
+    // Popula o campo nomeDono para cada vértice do grafo
+    for (i = 0; i < qtdPessoas; i++) {
+        offset = dadosIndice[i].byteOffset;
+        fseek(arqPessoa, offset, SEEK_SET);
+        copiaNoOffset(arqPessoa, nomeTemp);
+        grafo[i].nomeDono = strdup(nomeTemp);
+    }
+}
+
+void liberarNomesDono(Lista *grafo, int qtdPessoas) {
+    int i;
+    
+    // Libera a memória alocada para os nomes dos donos
+    for (i = 0; i < qtdPessoas; i++) {
+        if (grafo[i].nomeDono != NULL) {
+            free(grafo[i].nomeDono);
+            grafo[i].nomeDono = NULL;
+        }
+    }
+}

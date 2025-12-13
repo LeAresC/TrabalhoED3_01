@@ -17,6 +17,8 @@
 #include "ordena_segue.h"
 #include "criar_tabela_segue.h"
 #include "junta_pessoa_segue.h"
+#include "caminho_seguidor_celebridade.h"
+#include "fofoca.h"
 #define MAXIMO 500
 
 int main()
@@ -228,4 +230,24 @@ int main()
             erroAbertura();
         }
     }
+
+    if (funcionalidade == 13) {
+        // Lê os nomes dos arquivos e o nome da celebridade
+        char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO], nomeCelebridade[MAXIMO];
+        scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
+        scanQuoteString(nomeCelebridade);
+        // Chama a função para encontrar o caminho do seguidor até a celebridade
+        caminhoSeguidorCelebridade(arqPessoa, arqIndex, arqSegue, nomeCelebridade);
+    }
+
+    if (funcionalidade == 14) {
+        // Lê os nomes dos arquivos e o nome do fofoqueiro
+        char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO], nomeFofoqueiro[MAXIMO];
+        scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
+        scanQuoteString(nomeFofoqueiro);
+        // Chama a função para detectar ciclos iniciando do fofoqueiro
+        fofoca(arqPessoa, arqIndex, arqSegue, nomeFofoqueiro);
+    }
+
+    return 0;
 }
