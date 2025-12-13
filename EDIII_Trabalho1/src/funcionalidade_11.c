@@ -12,20 +12,19 @@ void liberaListaAdjacencia(Lista *lista, int qtdPessoas)
 {
     if (lista == NULL) return;
 
-    // 1. Percorre cada posição do vetor principal (cada vértice)
+    //Percorre cada posição do vetor principal (cada vértice)
     for (int i = 0; i < qtdPessoas; i++)
     {
         No *atual = lista[i].inicio;
         No *proxNo;
 
-        // 2. Percorre a lista encadeada de arestas
+        //Percorre a lista encadeada de arestas
         while (atual != NULL)
         {
             proxNo = atual->prox; // Salva o endereço do próximo antes de destruir o atual
             
-            // Como os nomes são estáticos (char nome[TAM]), 
-            // NÃO precisamos fazer free(atual->nome...).
-            // Apenas liberamos a estrutura do nó.
+           
+            // liberamos a estrutura do nó.
             free(atual);
             
             atual = proxNo;
@@ -37,7 +36,7 @@ void liberaListaAdjacencia(Lista *lista, int qtdPessoas)
         lista[i].tamanho = 0;
     }
 
-    // 3. Libera o vetor principal de listas
+    //Libera o vetor principal de listas
     free(lista);
 }
 
