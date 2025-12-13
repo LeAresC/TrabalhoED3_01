@@ -8,20 +8,37 @@
 #include "utilidades.h"
 #define MAXIMO 2000
 
-void liberaListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
+void liberaListaAdjacencia(Lista *lista, int qtdPessoas)
 {
+    if (lista == NULL) return;
+
+    // 1. Percorre cada posição do vetor principal (cada vértice)
     for (int i = 0; i < qtdPessoas; i++)
     {
-        int qtdSegue = ListaAdjacencia[i].tamanho;
-        No *at = ListaAdjacencia[i].inicio;
-        for (int j = 0; j < qtdSegue; j++)
+        No *atual = lista[i].inicio;
+        No *proxNo;
+
+        // 2. Percorre a lista encadeada de arestas
+        while (atual != NULL)
         {
-            No *prox = at->prox;
-            free(at); 
-            at = prox; 
+            proxNo = atual->prox; // Salva o endereço do próximo antes de destruir o atual
+            
+            // Como os nomes são estáticos (char nome[TAM]), 
+            // NÃO precisamos fazer free(atual->nome...).
+            // Apenas liberamos a estrutura do nó.
+            free(atual);
+            
+            atual = proxNo;
         }
+        
+        // Zera os ponteiros da lista (boa prática)
+        lista[i].inicio = NULL;
+        lista[i].fim = NULL;
+        lista[i].tamanho = 0;
     }
-    free(ListaAdjacencia);
+
+    // 3. Libera o vetor principal de listas
+    free(lista);
 }
 
 int buscaAmizades(char *arqPessoa, char *arqIndex, char *arqSegue)

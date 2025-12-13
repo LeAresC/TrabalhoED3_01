@@ -28,21 +28,22 @@ void imprimeListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
                 printf("%s, ", at->nomeUsuarioQueESeguida);
                 printf("%s, ", at->nomeUsuarioQueSegue);
             }
-            if (strcmp(at->dataInicioQueSegue, "-") != 0)
+            if (strlen(at->dataInicioQueSegue) != 0)
                 printf("%s, ", at->dataInicioQueSegue);
             else
                 printf("NULO, ");
-            if (strcmp(at->dataFimQueSegue, "-") != 0)
+            if (strlen(at->dataFimQueSegue) != 0)
                 printf("%s, ", at->dataFimQueSegue);
             else
                 printf("NULO, ");
-            if (at->grauAmizade != '-')
+            if (at->grauAmizade != '$')
                 printf("%c", at->grauAmizade);
             else
                 printf("NULO");
             printf("\n");
             at = at->prox;
         }
+        if(ListaAdjacencia[i].tamanho != 0)
         printf("\n");
     }
 }
@@ -89,7 +90,6 @@ void InsereAdjacencia(FILE *arqP, FILE *arqS, int *Map, Lista *ListaDeAdjacencia
     {
         RegistroSegue RegAtualS;
         leRegistroSegue(arqS, &RegAtualS);
-        // 2. CORREÇÃO DO LOOP INFINITO
         if (RegAtualS.removido == '1')
         {
             // Se removido, incrementa o contador (pois leu um registro) e continua
@@ -100,27 +100,38 @@ void InsereAdjacencia(FILE *arqP, FILE *arqS, int *Map, Lista *ListaDeAdjacencia
         int idSeguidor = RegAtualS.idPessoaQueSegue;
         int Indice = Map[idSeguidor];
 
-        No *NoAtual = (No *)malloc(MAXIMO);
+        No *NoAtual = (No *)calloc(1,sizeof(No));
         long Aux = buscaBinIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueSegue);
-        if (Aux == -1)
+         if (Aux == -1)
+        {
+            Contador++;
             continue;
+        }
         long Offset = DadosIndice[Aux].byteOffset;
         fseek(arqP, Offset, SEEK_SET);
         copiaNoOffset(arqP, NoAtual->nomeUsuarioQueSegue);
 
         Aux = buscaBinIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueESeguida);
         if (Aux == -1)
+        {
+            Contador++;
             continue;
+        }
         Offset = DadosIndice[Aux].byteOffset;
         fseek(arqP, Offset, SEEK_SET);
         copiaNoOffset(arqP, NoAtual->nomeUsuarioQueESeguida);
 
-        strncpy(NoAtual->dataInicioQueSegue, RegAtualS.dataInicioQueSegue, 10);
-        NoAtual->dataInicioQueSegue[10] = '\0';
+        if(RegAtualS.dataInicioQueSegue[0] != '$')
+        {
+        strcpy(NoAtual->dataInicioQueSegue, RegAtualS.dataInicioQueSegue);
+        }
+        else NoAtual->dataInicioQueSegue[0] = '\0';
 
-        strncpy(NoAtual->dataFimQueSegue, RegAtualS.dataFimQueSegue, 10);
-        NoAtual->dataFimQueSegue[10] = '\0';
-
+        if(RegAtualS.dataFimQueSegue[0] != '$')
+        {
+        strcpy(NoAtual->dataFimQueSegue, RegAtualS.dataFimQueSegue);
+        }
+        else NoAtual->dataFimQueSegue[0] = '\0';
         NoAtual->grauAmizade = RegAtualS.grauAmizade;
 
         if (TipoGrafo == 1)
@@ -207,9 +218,6 @@ void ordenarListaInterna(Lista ListaAtual)
 
             int comparador = 0;
 
-            // Comparação Primária: Nomes
-            // Tipo 0 (Func 11): Ordena por quem É SEGUIDO [cite: 483]
-            // Tipo 1 (Func 12): Ordena por quem SEGUE [cite: 536]
             if (TipoGrafo == 0)
                 comparador = strcmp(at->nomeUsuarioQueESeguida, at->prox->nomeUsuarioQueESeguida);
             else
@@ -219,12 +227,6 @@ void ordenarListaInterna(Lista ListaAtual)
             if (comparador == 0)
             {
                 comparador = compararDatas(at->dataInicioQueSegue, at->prox->dataInicioQueSegue);
-                
-                // Comparação Terciária: Data de Fim (se datas de início forem iguais)
-                // Recomendado pelas regras gerais de ordenação 
-                if (comparador == 0) {
-                     comparador = compararDatas(at->dataFimQueSegue, at->prox->dataFimQueSegue);
-                }
             }
 
             // Realiza a troca se necessário
@@ -271,7 +273,7 @@ void ordenarListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
 
 Lista *criaListaAdjacencia(int Tipo, FILE *arqP, FILE *arqS, RegistroIndice *DadosIndice, int qtdPessoas, int qtdSegues)
 {
-    Lista *ListaDeAdjacencia = (Lista *)malloc(sizeof(Lista) * qtdPessoas);
+    Lista *ListaDeAdjacencia = (Lista *)calloc(qtdPessoas,sizeof(Lista));
 
     TipoGrafo = Tipo;
     int Map[MAXIMO];
