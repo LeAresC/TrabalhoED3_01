@@ -1,13 +1,13 @@
 #ifndef DATA_STRUCTS_H
 #define DATA_STRUCTS_H
 
-typedef struct No {
-    char *nomeUsuarioQueSegue;
-    char *nomeUsuarioQueESeguida;
+typedef struct AuxNo {
+    char nomeUsuarioQueSegue[100];
+    char nomeUsuarioQueESeguida[100];
     char dataInicioQueSegue[11]; // 10 para "DD/MM/AAAA" + 1 para '\0'
     char dataFimQueSegue[11];    // 10 para "DD/MM/AAAA" + 1 para '\0'
     char grauAmizade; // '0' a '2' ou '\0' para nulo
-    struct No *prox;
+    struct AuxNo *prox;
 }No;
 
 typedef struct {

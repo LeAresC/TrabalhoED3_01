@@ -6,7 +6,7 @@
 #include "utilidades.h"
 #include "io_cabecalho.h"
 #include "io_registro.h"
-#define MAXIMO 2000
+#define MAXIMO 5000
 
 int TipoGrafo = 0;
 
@@ -47,52 +47,100 @@ void imprimeListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
     }
 }
 
-void InsereAdjacencia(FILE *arqP, FILE *arqS, int Map[], Lista *ListaDeAdjacencia, int qtdSegues, int qtdPessoas, RegistroIndice **DadosIndice)
+void copiaNoOffset(FILE *arqP, char *NomeUsuario)
 {
-    fseek(arqS, SEEK_SET, 9);
+    RegistroPessoa registroAtual;
+
+    // 2. Verifica se a leitura do cabeçalho funcionou
+    if (fread(&registroAtual.removido, sizeof(char), 1, arqP) != 1)
+    {
+        registroAtual.removido = 'X'; // Marca erro
+    }
+
+    fread(&registroAtual.tamanhoRegistro, sizeof(int), 1, arqP);
+
+    fread(&registroAtual.idPessoa, sizeof(int), 1, arqP);
+    fread(&registroAtual.idadePessoa, sizeof(int), 1, arqP);
+
+    // 3. Leitura Crítica: Tamanho do Nome
+    fread(&registroAtual.tamanhoNomePessoa, sizeof(int), 1, arqP);
+    char temp[100];
+    if (registroAtual.tamanhoNomePessoa > 0)
+    {
+        fread(temp, sizeof(char), registroAtual.tamanhoNomePessoa, arqP);
+    }
+
+    // 5. Repete para NomeUsuario
+    fread(&registroAtual.tamanhoNomeUsuario, sizeof(int), 1, arqP);
+
+    if (registroAtual.tamanhoNomeUsuario > 0)
+    {
+        fread(NomeUsuario, sizeof(char), registroAtual.tamanhoNomeUsuario, arqP);
+    }
+    NomeUsuario[registroAtual.tamanhoNomeUsuario] = '\0';
+}
+
+void InsereAdjacencia(FILE *arqP, FILE *arqS, int *Map, Lista *ListaDeAdjacencia, int qtdSegues, int qtdPessoas, RegistroIndice *DadosIndice)
+{
+    fseek(arqS, 9, SEEK_SET); // Pula cabeçalho
     int Contador = 0;
+    // Loop de segurança: roda enquanto Contador for menor E enquanto conseguir ler
     while (Contador < qtdSegues)
     {
         RegistroSegue RegAtualS;
         leRegistroSegue(arqS, &RegAtualS);
+        // 2. CORREÇÃO DO LOOP INFINITO
         if (RegAtualS.removido == '1')
         {
-            fseek(arqS, SEEK_CUR, 29);
+            // Se removido, incrementa o contador (pois leu um registro) e continua
+            Contador++;
             continue;
         }
 
-        int Indice = Map[RegAtualS.idPessoaQueSegue];
-        int TamanhoAtual = ListaDeAdjacencia[Indice].tamanho;
-        No *NoAtual = (No *)malloc(sizeof(No));
-        if (TamanhoAtual == 0)
+        int idSeguidor = RegAtualS.idPessoaQueSegue;
+        int Indice = Map[idSeguidor];
+
+        No *NoAtual = (No *)malloc(MAXIMO);
+        long Aux = buscaBinIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueSegue);
+        if (Aux == -1)
+            continue;
+        long Offset = DadosIndice[Aux].byteOffset;
+        fseek(arqP, Offset, SEEK_SET);
+        copiaNoOffset(arqP, NoAtual->nomeUsuarioQueSegue);
+
+        Aux = buscaBinIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueESeguida);
+        if (Aux == -1)
+            continue;
+        Offset = DadosIndice[Aux].byteOffset;
+        fseek(arqP, Offset, SEEK_SET);
+        copiaNoOffset(arqP, NoAtual->nomeUsuarioQueESeguida);
+
+        strncpy(NoAtual->dataInicioQueSegue, RegAtualS.dataInicioQueSegue, 10);
+        NoAtual->dataInicioQueSegue[10] = '\0';
+
+        strncpy(NoAtual->dataFimQueSegue, RegAtualS.dataFimQueSegue, 10);
+        NoAtual->dataFimQueSegue[10] = '\0';
+
+        NoAtual->grauAmizade = RegAtualS.grauAmizade;
+
+        if (TipoGrafo == 1)
+        {
+            Indice = Map[RegAtualS.idPessoaQueESeguida];
+        }
+        if (ListaDeAdjacencia[Indice].tamanho == 0)
         {
             ListaDeAdjacencia[Indice].inicio = NoAtual;
         }
         else
         {
-            ListaDeAdjacencia[Indice].fim->prox = NoAtual;
+            // Verifica se fim não é NULL por segurança
+            if (ListaDeAdjacencia[Indice].fim != NULL)
+                ListaDeAdjacencia[Indice].fim->prox = NoAtual;
+            else
+                ListaDeAdjacencia[Indice].inicio = NoAtual; // Fallback caso inconsistente
         }
+
         ListaDeAdjacencia[Indice].fim = NoAtual;
-
-        long Offset = buscaBinariaIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueSegue);
-        fseek(arqP, SEEK_SET, Offset);
-        RegistroPessoa *RegAtualP = leRegistroPessoa(arqP);
-        NoAtual->nomeUsuarioQueSegue = malloc(MAXIMO);
-        strcpy(NoAtual->nomeUsuarioQueSegue, RegAtualP->nomePessoa);
-
-        Offset = buscaBinariaIndice(DadosIndice, qtdPessoas, RegAtualS.idPessoaQueESeguida);
-        fseek(arqP, SEEK_SET, Offset);
-        RegAtualP = leRegistroPessoa(arqP);
-        NoAtual->nomeUsuarioQueESeguida = malloc(MAXIMO);
-        strcpy(NoAtual->nomeUsuarioQueESeguida, RegAtualP->nomePessoa);
-
-        strcpy(NoAtual->dataInicioQueSegue, RegAtualS.dataInicioQueSegue);
-
-        strcpy(NoAtual->dataFimQueSegue, RegAtualS.dataFimQueSegue);
-
-        NoAtual->grauAmizade = RegAtualS.grauAmizade;
-        NoAtual->prox = NULL;
-
         ListaDeAdjacencia[Indice].tamanho++;
         Contador++;
     }
@@ -117,57 +165,75 @@ int compararDatas(char *d1, char *d2)
 
 void trocaConteudo(No *no1, No *no2)
 {
-    No aux;
-    aux.nomeUsuarioQueESeguida = malloc(sizeof(MAXIMO));
-    aux.nomeUsuarioQueSegue = malloc(sizeof(MAXIMO));
+    // CUIDADO: Precisamos preservar o ponteiro 'prox', 
+    // pois queremos trocar apenas os DADOS, não a ligação da lista.
+    
+    // 1. Salva o 'prox' original de cada um
+    struct AuxNo *prox1 = no1->prox;
+    struct AuxNo *prox2 = no2->prox;
 
-    strcpy(aux.dataInicioQueSegue, no1->dataInicioQueSegue);
-    strcpy(aux.dataFimQueSegue, no1->dataFimQueSegue);
-    aux.grauAmizade = no1->grauAmizade;
-    strcpy(aux.nomeUsuarioQueESeguida, no1->nomeUsuarioQueESeguida);
-    strcpy(aux.nomeUsuarioQueSegue, no1->nomeUsuarioQueSegue);
+    // 2. Copia TUDO de no1 para uma auxiliar (copia automática dos arrays)
+    No aux = *no1;
 
-    strcpy(no1->dataInicioQueSegue, no2->dataInicioQueSegue);
-    strcpy(no1->dataFimQueSegue, no2->dataFimQueSegue);
-    no1->grauAmizade = no2->grauAmizade;
-    strcpy(no1->nomeUsuarioQueESeguida, no2->nomeUsuarioQueESeguida);
-    strcpy(no1->nomeUsuarioQueSegue, no2->nomeUsuarioQueSegue);
+    // 3. Troca os dados (copia automática dos arrays)
+    *no1 = *no2;
+    *no2 = aux;
 
-    strcpy(no2->dataInicioQueSegue, aux.dataInicioQueSegue);
-    strcpy(no2->dataFimQueSegue, aux.dataFimQueSegue);
-    no2->grauAmizade = aux.grauAmizade;
-    strcpy(no2->nomeUsuarioQueESeguida, aux.nomeUsuarioQueESeguida);
-    strcpy(no2->nomeUsuarioQueSegue, aux.nomeUsuarioQueSegue);
-
-    free(aux.nomeUsuarioQueESeguida);
-    free(aux.nomeUsuarioQueSegue);
+    // 4. Restaura os ponteiros 'prox' originais 
+    // (para não quebrar a corrente da lista encadeada)
+    no1->prox = prox1;
+    no2->prox = prox2;
 }
-
 void ordenarListaInterna(Lista ListaAtual)
 {
-    if (ListaAtual.tamanho == 0 || ListaAtual.inicio == NULL)
+    // Verificação inicial básica
+    if (ListaAtual.tamanho <= 1 || ListaAtual.inicio == NULL)
     {
         return;
     }
+
     int N = ListaAtual.tamanho;
+    
     for (int i = 0; i < N - 1; i++)
     {
         No *at = ListaAtual.inicio;
+        
         for (int j = 0; j < N - i - 1; j++)
         {
-            int comparador;
+            // --- PROTEÇÃO CONTRA SEGMENTATION FAULT ---
+            // Se o contador 'tamanho' estiver errado e for maior que 
+            // o número real de nós, isso evita acessar memória inválida.
+            if (at == NULL || at->prox == NULL) break; 
+
+            int comparador = 0;
+
+            // Comparação Primária: Nomes
+            // Tipo 0 (Func 11): Ordena por quem É SEGUIDO [cite: 483]
+            // Tipo 1 (Func 12): Ordena por quem SEGUE [cite: 536]
             if (TipoGrafo == 0)
                 comparador = strcmp(at->nomeUsuarioQueESeguida, at->prox->nomeUsuarioQueESeguida);
             else
                 comparador = strcmp(at->nomeUsuarioQueSegue, at->prox->nomeUsuarioQueSegue);
+
+            // Comparação Secundária: Data de Início (se nomes forem iguais)
             if (comparador == 0)
             {
                 comparador = compararDatas(at->dataInicioQueSegue, at->prox->dataInicioQueSegue);
+                
+                // Comparação Terciária: Data de Fim (se datas de início forem iguais)
+                // Recomendado pelas regras gerais de ordenação 
+                if (comparador == 0) {
+                     comparador = compararDatas(at->dataFimQueSegue, at->prox->dataFimQueSegue);
+                }
             }
+
+            // Realiza a troca se necessário
             if (comparador > 0)
             {
                 trocaConteudo(at, at->prox);
             }
+
+            // Avança o ponteiro
             at = at->prox;
         }
     }
@@ -194,9 +260,8 @@ int compararListas(const void *a, const void *b)
     return strcmp(listaA->inicio->nomeUsuarioQueESeguida, listaB->inicio->nomeUsuarioQueESeguida);
 }
 
-void ordenarListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas, int Tipo)
+void ordenarListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
 {
-    TipoGrafo = Tipo;
     qsort(ListaAdjacencia, qtdPessoas, sizeof(Lista), compararListas);
     for (int i = 0; i < qtdPessoas; i++)
     {
@@ -204,17 +269,19 @@ void ordenarListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas, int Tipo)
     }
 }
 
-Lista *criaListaAdjacencia(FILE *arqP, FILE *arqS, RegistroIndice **DadosIndice, int qtdPessoas, int qtdSegues)
+Lista *criaListaAdjacencia(int Tipo, FILE *arqP, FILE *arqS, RegistroIndice *DadosIndice, int qtdPessoas, int qtdSegues)
 {
     Lista *ListaDeAdjacencia = (Lista *)malloc(sizeof(Lista) * qtdPessoas);
 
+    TipoGrafo = Tipo;
     int Map[MAXIMO];
-    memset(Map, -1, sizeof(Map));
 
     for (int i = 0; i < qtdPessoas; i++)
     {
-        Map[DadosIndice[i]->idPessoa] = i;
+        Map[DadosIndice[i].idPessoa] = i;
         ListaDeAdjacencia[i].tamanho = 0;
+        ListaDeAdjacencia[i].inicio = NULL;
+        ListaDeAdjacencia[i].fim = NULL;
     }
     InsereAdjacencia(arqP, arqS, Map, ListaDeAdjacencia, qtdSegues, qtdPessoas, DadosIndice);
     return ListaDeAdjacencia;

@@ -6,35 +6,10 @@
 #include "auxiliares_grafo.h"
 #include "io_cabecalho.h"
 #include "utilidades.h"
+#include "funcionalidade_11.h"
 #define MAXIMO 2000
 
-void liberaRegistroIndice(RegistroIndice **DadosIndice, int qtdPessoas)
-{
-    for (int i = 0; i < qtdPessoas; i++)
-    {
-        free(DadosIndice[i]);
-    }
-    free(DadosIndice);
-}
-void liberaListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas)
-{
-    for (int i = 0; i < qtdPessoas; i++)
-    {
-        int qtdSegue = ListaAdjacencia[i].tamanho;
-        No *at = ListaAdjacencia[i].inicio;
-        for (int j = 0; j < qtdSegue; j++)
-        {
-            No *prox = at->prox;
-            free(at->nomeUsuarioQueESeguida);
-            free(at->nomeUsuarioQueSegue);
-            free(at); 
-            at = prox; 
-        }
-    }
-    free(ListaAdjacencia);
-}
-
-int buscaAmizades(char *arqPessoa, char *arqIndex, char *arqSegue)
+int buscaAmizadesTransposto(char *arqPessoa, char *arqIndex, char *arqSegue)
 {
     // Abre os arquivos e verifica se conseguiu abrir
     FILE *arquivoPessoa = fopen(arqPessoa, "rb");
@@ -53,21 +28,21 @@ int buscaAmizades(char *arqPessoa, char *arqIndex, char *arqSegue)
     CabecalhoSegue CabecalhoS = leCabecalhoSegue(arquivoSegue);
 
     // Passa todos os dados do arquivo de Indice para a RAM
-    RegistroIndice **DadosIndice = leArquivoIndice(arquivoIndice, CabecalhoP->quantidadePessoas);
+    RegistroIndice *DadosIndice = leArqIndice(arquivoIndice, CabecalhoP->quantidadePessoas);
 
     // Cria a lista de adjacência na RAM
-    Lista *ListaAdjacencia = criaListaAdjacencia(arquivoPessoa, arquivoSegue, DadosIndice, CabecalhoP->quantidadePessoas, CabecalhoS.quantidadePessoas);
+    Lista *ListaAdjacencia = criaListaAdjacencia(TipoGrafo, arquivoPessoa, arquivoSegue, DadosIndice, CabecalhoP->quantidadePessoas, CabecalhoS.quantidadePessoas);
 
     // Ordena lista de adjacência
-    ordenarListaAdjacencia(ListaAdjacencia, CabecalhoP->quantidadePessoas, TipoGrafo);
+    ordenarListaAdjacencia(ListaAdjacencia, CabecalhoP->quantidadePessoas);
 
     // Imprime a lista de adjacência
     imprimeListaAdjacencia(ListaAdjacencia, CabecalhoP->quantidadePessoas);
 
     // Libera a memória alocada
     liberaListaAdjacencia(ListaAdjacencia, CabecalhoP->quantidadePessoas);
-    liberaRegistroIndice(DadosIndice, CabecalhoP->quantidadePessoas);
     free(CabecalhoP);
+    free(DadosIndice);
     fclose(arquivoPessoa);
     fclose(arquivoIndice);
     fclose(arquivoSegue);

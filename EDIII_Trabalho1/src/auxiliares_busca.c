@@ -6,7 +6,7 @@
 #include "utilidades.h"
 #include "utils.h"
 #include "io_registro.h"
-#define MAXIMO 2000
+#define MAXIMO 5000
 
 int determinarCampoBusca(char *nomeCampo)
 {
@@ -50,6 +50,52 @@ void descartaLixo(FILE *arqD)
     fseek(arqD, -1, SEEK_CUR);
 }
 
+RegistroPessoa leRegPessoa(FILE *arq)
+{
+    RegistroPessoa registroAtual;
+    // 1. Limpa a struct para evitar lixo de memória
+    // Isso garante que tamanhos sejam 0 se a leitura falhar
+    memset(&registroAtual, 0, sizeof(RegistroPessoa));
+
+    // 2. Verifica se a leitura do cabeçalho funcionou
+    if (fread(&registroAtual.removido, sizeof(char), 1, arq) != 1) {
+        registroAtual.removido = 'X'; // Marca erro
+        return registroAtual;
+    }
+
+    fread(&registroAtual.tamanhoRegistro, sizeof(int), 1, arq);
+
+    if (registroAtual.removido == '1')
+    {
+        // Importante: Pular o registro removido
+        fseek(arq, registroAtual.tamanhoRegistro, SEEK_CUR);
+        return registroAtual;
+    }
+
+    fread(&registroAtual.idPessoa, sizeof(int), 1, arq);
+    fread(&registroAtual.idadePessoa, sizeof(int), 1, arq);
+    
+    // 3. Leitura Crítica: Tamanho do Nome
+    fread(&registroAtual.tamanhoNomePessoa, sizeof(int), 1, arq);
+    registroAtual.nomePessoa = (char *)calloc(registroAtual.tamanhoNomePessoa + 1, sizeof(char));
+    if (registroAtual.tamanhoNomePessoa > 0)
+    {
+        fread(registroAtual.nomePessoa, sizeof(char), registroAtual.tamanhoNomePessoa, arq);
+    }
+    registroAtual.nomePessoa[registroAtual.tamanhoNomePessoa] = '\0';
+
+
+    // 5. Repete para NomeUsuario
+    fread(&registroAtual.tamanhoNomeUsuario, sizeof(int), 1, arq);
+
+    registroAtual.nomeUsuario = (char *)calloc(registroAtual.tamanhoNomeUsuario + 1, sizeof(char));
+    if (registroAtual.tamanhoNomeUsuario > 0)
+    {
+        fread(registroAtual.nomeUsuario, sizeof(char), registroAtual.tamanhoNomeUsuario, arq);
+    }
+    registroAtual.nomeUsuario[registroAtual.tamanhoNomeUsuario] = '\0';
+    return registroAtual;
+}
 RegistroPessoa *leRegistroPessoa(FILE *arq)
 {
     // Declara o ponteiro para o registro atual com um espaço na memória igual ao tamanho do registro
@@ -107,17 +153,19 @@ void imprimirSaida(RegistroPessoa *registroAtual)
 {
     // Imprime o registroAtual segundo as especificações do trabalho
     printf("Dados da pessoa de codigo %d\n", registroAtual->idPessoa);
-    if(registroAtual->tamanhoNomePessoa != 0)
-    printf("Nome: %s\n", registroAtual->nomePessoa);
-    else printf("Nome: -\n");
+    if (registroAtual->tamanhoNomePessoa != 0)
+        printf("Nome: %s\n", registroAtual->nomePessoa);
+    else
+        printf("Nome: -\n");
     // Se a idade do registroAtual for -1 imprime "-" do contrário imprime a idade da memória
     if (registroAtual->idadePessoa != -1)
         printf("Idade: %d\n", registroAtual->idadePessoa);
     else
         printf("Idade: -\n");
-    if(registroAtual->tamanhoNomeUsuario != 0)
-    printf("Usuario: %s\n\n", registroAtual->nomeUsuario);
-    else printf("Usuario: -\n");
+    if (registroAtual->tamanhoNomeUsuario != 0)
+        printf("Usuario: %s\n\n", registroAtual->nomeUsuario);
+    else
+        printf("Usuario: -\n");
 }
 
 void erroAbertura()
@@ -156,18 +204,59 @@ RegistroIndice **leArquivoIndice(FILE *arqI, int N)
 {
 
     // Le o arquivo de Indice como um todo
-    fseek(arqI, 0, SEEK_SET);
-    CabecalhoIndice *CabecalhoI = leCabecalhoIndice(arqI);
-    RegistroIndice **ArquivoCompleto = (RegistroIndice **)malloc(sizeof(RegistroIndice *) * MAXIMO);
+    fseek(arqI, 12, SEEK_SET);
+    RegistroIndice **ArquivoCompleto = (RegistroIndice **)malloc(sizeof(RegistroIndice *) * N);
     for (int i = 0; i < N; i++)
     {
-
         ArquivoCompleto[i] = (RegistroIndice *)malloc(sizeof(RegistroIndice));
         fread(&ArquivoCompleto[i]->idPessoa, sizeof(int), 1, arqI);
         fread(&ArquivoCompleto[i]->byteOffset, sizeof(long long int), 1, arqI);
     }
-    free(CabecalhoI);
     return ArquivoCompleto;
+}
+RegistroIndice *leArqIndice(FILE *arqI, int N)
+{
+    fseek(arqI, 12, SEEK_SET);
+    RegistroIndice *ArqCompleto = (RegistroIndice *)calloc(N,sizeof(RegistroIndice));
+    for (int i = 0; i < N; i++)
+    {
+        fread(&ArqCompleto[i].idPessoa, sizeof(int), 1, arqI);
+        fread(&ArqCompleto[i].byteOffset, sizeof(long long int), 1, arqI);
+    }
+    return ArqCompleto;
+}
+
+int buscaBinIndice(RegistroIndice *ArqIndice, int tamanhoVetor, int valorId)
+{
+    // Faz a busca binária no arquivo de indice
+    int l = 0;
+    int r = tamanhoVetor;
+    // Faz a busca binária no arquivo de indice
+    while (l < r)
+    {
+        int id;
+        int indice = l + (r - l) / 2;
+        // Le e armazena o ID e RRN atual correspondente
+        id = ArqIndice[indice].idPessoa;
+        // Se o id atual foir maior que o procurado r = mid
+        if (id > valorId)
+        {
+            r = indice;
+        }
+        // Do contrário se o id atual for menor que o procurado l = mid + 1
+        else if (id < valorId)
+        {
+            l = indice + 1;
+        }
+
+        // Se encontrou o ID retorna o indice equivalente
+        else if (id == valorId)
+        {
+            return indice;
+        }
+    }
+    // Se não encontrou o ID retorna -1 (Inválido)
+    return -1;
 }
 
 int buscaBinariaIndice(RegistroIndice **ArquivoIndice, int tamanhoVetor, int valorId)

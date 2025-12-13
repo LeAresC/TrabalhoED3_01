@@ -7,6 +7,8 @@ RegistroIndice **leArquivoIndice(FILE *arqI, int N);
 RegistroPessoa *leRegistroPessoa(FILE *arq);
 CabecalhoIndice *leCabecalhoIndice(FILE *arqI);
 CabecalhoPessoa *leCabecalhoPessoa(FILE *arqD);
+RegistroPessoa leRegPessoa(FILE *arq);
+RegistroIndice *leArqIndice(FILE *arqI, int N);
 void erroAbertura();
 void erroRegistro();
 void imprimirSaida(RegistroPessoa *registroAtual);
@@ -16,5 +18,6 @@ int buscaBinariaIndice(RegistroIndice** ArquivoIndice, int tamanhoVetor, int val
 int determinarCampoBusca(char *nomeCampo);
 void descartaLixo(FILE *arqD);
 void leInput(char *nomeCampo, char *valorCampo);
+int buscaBinIndice(RegistroIndice *ArqIndice, int tamanhoVetor, int valorId);
 
 #endif // AUXILIARES_BUSCA_H
