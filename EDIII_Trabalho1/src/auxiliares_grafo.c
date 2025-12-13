@@ -78,7 +78,7 @@ void copiaNoOffset(FILE *arqP, char *NomeUsuario)
     }
     fread(&registroAtual.tamanhoNomeUsuario, sizeof(int), 1, arqP);
 
-    // Le o nomeUsuario e guarda na String Definida
+    // Le o nomeUsuario e guarda na String desejada (nomeUsuarioSegue ou nomeUsuarioQueESeguido)
     if (registroAtual.tamanhoNomeUsuario > 0)
     {
         fread(NomeUsuario, sizeof(char), registroAtual.tamanhoNomeUsuario, arqP);
