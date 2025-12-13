@@ -8,6 +8,7 @@
 #include "io_registro.h"
 #define MAXIMO 5000
 
+// Variável global que determina o tipo de Grafo (0 = normal , 1 = Transposto)
 int TipoGrafo = 0;
 
 // Faz a impressão da lista de Ajacencia

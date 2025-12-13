@@ -50,6 +50,7 @@ int buscaAmizades(char *arqPessoa, char *arqIndex, char *arqSegue)
     {
         return 0;
     }
+    // Define o tipo de Grafo, 0 = Normal, 1 = Transposto
     int TipoGrafo = 0;
     // Le o cabecalho do arquivo pessoa
     CabecalhoPessoa *CabecalhoP = leCabecalhoPessoa(arquivoPessoa);

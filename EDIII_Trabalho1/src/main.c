@@ -204,21 +204,27 @@ int main()
     }
     if(funcionalidade == 11)
     {
+        // Le os nomes dos arquivos e chama a função que define e ordena o grafo
         char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO];
         scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
         resultado = buscaAmizades(arqPessoa, arqIndex, arqSegue);
+        // Retorna 1 se tudo der certo, 0 caso contrário
         if (resultado == 0)
         {
+            // Falha na criação do grafo, imprime erro
             erroAbertura();
         }
     }
     if(funcionalidade == 12)
     {
+        // Le os nomes dos arquivos e chama a função que define e ordena o grafo
         char arqPessoa[MAXIMO], arqIndex[MAXIMO], arqSegue[MAXIMO];
         scanf("%s %s %s", arqPessoa, arqIndex, arqSegue);
         resultado = buscaAmizadesTransposto(arqPessoa, arqIndex, arqSegue);
+        // Retorna 1 se tudo der certo, 0 caso contrário
         if (resultado == 0)
         {
+             // Falha na criação do grafo, imprime erro
             erroAbertura();
         }
     }
