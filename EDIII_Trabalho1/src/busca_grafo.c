@@ -4,6 +4,49 @@
 #include "busca_grafo.h"
 #include "auxiliares_grafo.h"
 
+// Função auxiliar para comparar caminhos completos lexicograficamente
+// Retorna -1 se caminho através de newParent é menor, 1 se maior, 0 se igual
+// Compara de trás para frente (prioriza vértices mais próximos do destino)
+int compararCaminhos(Lista *grafo, int *antecessor, int vertice, int newParent, int oldParent) {
+    // Constrói os caminhos até a raiz
+    int pathNew[1000], pathOld[1000];
+    int lenNew = 0, lenOld = 0;
+    int v;
+    
+    // Caminho através do novo pai
+    pathNew[lenNew++] = newParent;
+    v = antecessor[newParent];
+    while (v != -1) {
+        pathNew[lenNew++] = v;
+        v = antecessor[v];
+    }
+    
+    // Caminho através do pai antigo  
+    pathOld[lenOld++] = oldParent;
+    v = antecessor[oldParent];
+    while (v != -1) {
+        pathOld[lenOld++] = v;
+        v = antecessor[v];
+    }
+    
+    // Compara os caminhos de trás para frente (do início ao fim do caminho original)
+    // Os arrays estão com a raiz no final, então comparamos do final para o início
+    int minLen = lenNew < lenOld ? lenNew : lenOld;
+    for (int i = 0; i < minLen; i++) {
+        // Compara da raiz (final do array) para o destino (início do array)
+        int idxFromEnd = (lenNew - 1 - i < 0) ? 0 : (lenNew - 1 - i);
+        int idxFromEndOld = (lenOld - 1 - i < 0) ? 0 : (lenOld - 1 - i);
+        
+        int cmp = strcmp(grafo[pathNew[idxFromEnd]].nomeDono, grafo[pathOld[idxFromEndOld]].nomeDono);
+        if (cmp != 0) return cmp;
+    }
+    
+    // Se um caminho é prefixo do outro, o mais curto vem primeiro
+    if (lenNew < lenOld) return -1;
+    if (lenNew > lenOld) return 1;
+    return 0;
+}
+
 int buscarIndice(Lista *grafo, int numVertices, char *nome) {
     int esq, dir, meio, cmp;
     
@@ -138,13 +181,29 @@ ResultadoBFS* executarBFSCaminho(Lista *grafo, int numVertices, int startIdx, in
         // Percorre lista de adjacência do vértice u
         aresta = grafo[u].inicio;
         while (aresta != NULL) {
-            v = buscarIndice(grafo, numVertices, aresta->nomeUsuarioQueESeguida);
-            
-            if (v != -1 && !res->visitado[v]) {
-                res->visitado[v] = 1;
-                res->distancia[v] = res->distancia[u] + 1;
-                res->antecessor[v] = u;
-                enfileirar(f, v);
+            // Verifica se a relação ainda está ativa (dataFimQueSegue vazio)
+            if (aresta->dataFimQueSegue[0] == '\0') {
+                v = buscarIndice(grafo, numVertices, aresta->nomeUsuarioQueESeguida);
+                
+                if (v != -1) {
+                    int newDist = res->distancia[u] + 1;
+                    
+                    // Se não visitado ainda, ou se mesma distância mas caminho lexicograficamente melhor
+                    if (!res->visitado[v]) {
+                        res->visitado[v] = 1;
+                        res->distancia[v] = newDist;
+                        res->antecessor[v] = u;
+                        enfileirar(f, v);
+                    }
+                    // Se já visitado com mesma distância, verifica se este caminho é lexicograficamente melhor
+                    else if (res->distancia[v] == newDist) {
+                        // Compara o predecessor imediato (vértice que vem antes de v no caminho)
+                        if (strcmp(grafo[u].nomeDono, grafo[res->antecessor[v]].nomeDono) < 0) {
+                            res->antecessor[v] = u;
+                            enfileirar(f, v);
+                        }
+                    }
+                }
             }
             
             aresta = aresta->prox;
@@ -229,6 +288,7 @@ int executarBFSCiclo(Lista *grafo, int numVertices, int startIdx) {
         
         aresta = grafo[u].inicio;
         while (aresta != NULL) {
+            // For cycle detection, check ALL edges (active and inactive)
             v = buscarIndice(grafo, numVertices, aresta->nomeUsuarioQueESeguida);
             
             if (v != -1) {

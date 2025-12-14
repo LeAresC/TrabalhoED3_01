@@ -9,3 +9,5 @@ void ordenarListaAdjacencia(Lista *ListaAdjacencia, int qtdPessoas);
 void copiaNoOffset(FILE *arqP, char *nomeUsuario);
 void preencherNomesDono(Lista *grafo, int qtdPessoas, RegistroIndice *dadosIndice, FILE *arqPessoa);
 void liberarNomesDono(Lista *grafo, int qtdPessoas);
+int compararListasPorNomeDono(const void *a, const void *b);
+void ordenarListaAdjacenciaPorNomeDono(Lista *ListaAdjacencia, int qtdPessoas);

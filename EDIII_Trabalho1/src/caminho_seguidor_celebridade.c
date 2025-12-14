@@ -46,8 +46,8 @@ void caminhoSeguidorCelebridade(char *arqPessoa, char *arqIndex, char *arqSegue,
     // Preenche o campo nomeDono (ponte entre Feature 11 e 13)
     preencherNomesDono(listaAdjacencia, cabecalhoP->quantidadePessoas, dadosIndice, arquivoPessoa);
     
-    // Ordena a lista de adjacência
-    ordenarListaAdjacencia(listaAdjacencia, cabecalhoP->quantidadePessoas);
+    // Ordena a lista de adjacência por nomeDono (para busca binária)
+    ordenarListaAdjacenciaPorNomeDono(listaAdjacencia, cabecalhoP->quantidadePessoas);
     
     // Busca o índice da celebridade no grafo
     indiceCelebridade = buscarIndice(listaAdjacencia, cabecalhoP->quantidadePessoas, nomeCelebridade);

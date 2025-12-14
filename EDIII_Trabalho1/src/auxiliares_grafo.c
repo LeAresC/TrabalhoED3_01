@@ -247,6 +247,12 @@ void ordenarListaInterna(Lista ListaAtual)
                 comparador = compararDatas(at->dataInicioQueSegue, at->prox->dataInicioQueSegue);
             }
 
+            // Comparação Terciária: Data de Fim (se datas de início forem iguais)
+            if (comparador == 0)
+            {
+                comparador = compararDatas(at->dataFimQueSegue, at->prox->dataFimQueSegue);
+            }
+
             // Realiza a troca se necessário
             if (comparador > 0)
             {
@@ -337,5 +343,32 @@ void liberarNomesDono(Lista *grafo, int qtdPessoas) {
             free(grafo[i].nomeDono);
             grafo[i].nomeDono = NULL;
         }
+    }
+}
+
+// Função de comparação para funcionalidades 13 e 14 (compara por nomeDono)
+int compararListasPorNomeDono(const void *a, const void *b) {
+    Lista *listaA = (Lista *)a;
+    Lista *listaB = (Lista *)b;
+
+    // Tratamento para listas sem nomeDono
+    if (listaA->nomeDono == NULL && listaB->nomeDono == NULL)
+        return 0;
+    if (listaA->nomeDono == NULL)
+        return 1; // Lista sem nome vai para o final
+    if (listaB->nomeDono == NULL)
+        return -1;
+
+    // Compara diretamente pelo campo nomeDono
+    return strcmp(listaA->nomeDono, listaB->nomeDono);
+}
+
+// Função que ordena a lista por nomeDono (para funcionalidades 13 e 14)
+void ordenarListaAdjacenciaPorNomeDono(Lista *ListaAdjacencia, int qtdPessoas) {
+    // Ordena os indices com base no nomeDono
+    qsort(ListaAdjacencia, qtdPessoas, sizeof(Lista), compararListasPorNomeDono);
+    for (int i = 0; i < qtdPessoas; i++) {
+        // Ordena cada Indice com base no outro NomeUsuario
+        ordenarListaInterna(ListaAdjacencia[i]);
     }
 }
