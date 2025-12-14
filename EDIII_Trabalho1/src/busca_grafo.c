@@ -58,7 +58,7 @@ int desenfileirar(Fila *f) {
     NoFila *temp;
     int val;
     
-    if (f->inicio == NULL) return -1;
+    if (filaVazia(f)) return -1;
     
     // Remove do início da fila
     temp = f->inicio;
@@ -245,7 +245,7 @@ int executarBFSCiclo(Lista *grafo, int numVertices, int startIdx) {
         
         aresta = grafo[u].inicio;
         while (aresta != NULL) {
-            // For cycle detection, check ALL edges (active and inactive)
+            // Verifica mesmo se a relação está ativa ou não
             v = buscarIndice(grafo, numVertices, aresta->nomeUsuarioQueESeguida);
             
             if (v != -1) {
